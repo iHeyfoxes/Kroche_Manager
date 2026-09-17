@@ -106,3 +106,35 @@ textarea:focus-visible {
     }
 }/* Ajustes modernos das telas de autenticação */
 .auth-card{background:transparent;box-shadow:none;padding:0;max-width:380px}.auth-card h1{text-align:left}.auth-card p.subtitulo{text-align:left}.auth-wrapper{padding:0}.coluna-form{background:#fffaf5}.form-control{background:#fff}.btn-marrom{width:100%}@media(max-width:900px){.coluna-cenario{min-height:170px!important}.coluna-form{min-height:auto!important;padding:2rem 1.5rem!important}.auth-container{margin:auto}.cena-conteudo{display:none!important}}
+
+/* ==========================================================
+   LOGIN / AUTENTICAÇÃO — layout recuperado e independente
+   ========================================================== */
+body:has(.coluna-form){margin:0;min-height:100vh;font-family:Karla,Arial,sans-serif;background:#f8f1e8;color:#4e3629;display:grid;grid-template-columns:44% 56%;overflow-x:hidden}
+.coluna-form{min-height:100vh;background:#f8f1e8;display:flex;flex-direction:column;padding:42px 7vw 42px 7vw;box-sizing:border-box}
+.marca-topo{display:flex;align-items:center;gap:10px;font-family:Georgia,serif;font-size:22px;font-weight:700;color:#4e3629}
+.auth-container{width:100%;max-width:430px;margin:auto}
+.auth-card{width:100%;box-sizing:border-box;background:transparent;padding:0;box-shadow:none}
+.auth-card h1{font-family:Georgia,serif;font-size:40px;line-height:1.08;margin:0 0 10px;color:#4e3629;text-align:left}
+.auth-card .subtitulo{margin:0 0 30px;color:#81756c;font-size:16px;text-align:left}
+.form-label{display:block;margin:0 0 7px;font-size:14px;font-weight:700;color:#5b4639}
+.form-control{display:block;width:100%;box-sizing:border-box;border:1px solid #d9c9b8;border-radius:8px;background:#fff;padding:13px 14px;margin:0 0 18px;color:#4e3629;font-size:15px;outline:none}
+.form-control:focus{border-color:#6b4e3d;box-shadow:0 0 0 3px rgba(107,78,61,.12)}
+.btn-marrom{display:block;width:100%;border:0;border-radius:8px;background:#6b4e3d;color:#fff;padding:13px 16px;font-weight:700;font-size:15px;cursor:pointer;transition:.2s}
+.btn-marrom:hover{background:#4e3629}
+.btn-marrom:disabled{opacity:.65;cursor:wait}
+.auth-links{text-align:center;margin-top:24px;color:#81756c;font-size:14px;line-height:1.35}
+.auth-links a{color:#6b4e3d;font-weight:700;text-decoration:none}
+.auth-links a:hover{text-decoration:underline}
+.alerta{display:none;padding:11px 13px;margin-bottom:16px;border-radius:8px;background:#fdecea;color:#a33a2b;font-size:14px}
+.coluna-cenario{position:relative;min-height:100vh;background:linear-gradient(145deg,#4e3629 0%,#34231d 58%,#211714 100%);overflow:hidden;display:flex;align-items:center;padding:8vw;box-sizing:border-box;color:#fff}
+.coluna-cenario .brilho{position:absolute;width:520px;height:520px;border-radius:50%;background:rgba(214,166,102,.12);filter:blur(20px);right:-180px;top:-140px}
+.cena-conteudo{position:relative;z-index:2;max-width:570px}
+.eyebrow{display:inline-block;color:#e4bd7a;text-transform:uppercase;letter-spacing:2px;font-size:12px;font-weight:700;margin-bottom:20px}
+.cena-conteudo h2{font-family:Georgia,serif;font-size:clamp(38px,4vw,62px);line-height:1.05;margin:0 0 22px;font-weight:700}
+.cena-conteudo p{font-size:18px;line-height:1.65;color:rgba(255,255,255,.78);max-width:510px;margin:0}
+.novelo{position:absolute;border-radius:50%;background:radial-gradient(circle at 35% 28%,#a8613f 0%,#6b3a2c 58%,#3f2016 100%);box-shadow:0 20px 45px rgba(0,0,0,.28);opacity:.75}
+.novelo:after{content:"";position:absolute;inset:14%;border:2px solid rgba(255,255,255,.08);border-radius:50%}
+.n1{width:120px;height:120px;right:12%;top:12%}.n2{width:70px;height:70px;right:30%;bottom:13%}.n3{width:48px;height:48px;right:8%;bottom:28%}.n4{width:32px;height:32px;left:9%;bottom:10%}
+@media(max-width:900px){body:has(.coluna-form){display:flex;flex-direction:column;overflow:auto}.coluna-cenario{order:-1;min-height:210px;height:210px;padding:28px 24px;align-items:flex-end}.cena-conteudo{max-width:100%}.cena-conteudo h2{font-size:28px;margin-bottom:0}.cena-conteudo p,.eyebrow{display:none}.coluna-form{min-height:calc(100vh - 210px);padding:25px 24px 35px}.marca-topo{font-size:19px}.auth-container{max-width:520px}.auth-card h1{font-size:32px}}
+@media(max-width:520px){.coluna-cenario{min-height:150px;height:150px}.coluna-form{min-height:calc(100vh - 150px);padding:22px 18px 30px}.auth-card h1{font-size:29px}.form-control{margin-bottom:14px}.n1{width:75px;height:75px;right:8%;top:10%}.n2{width:45px;height:45px;right:28%;bottom:10%}}
