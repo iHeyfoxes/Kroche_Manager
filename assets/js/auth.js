@@ -120,6 +120,16 @@ async function fazerLogout() {
     window.location.href = "login.html";
 }
 
+// ---------- MENU LATERAL ----------
+// Necessário para o menu mobile e para fechar o menu ao trocar de rota.
+function closeMenu() {
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("menuOverlay");
+
+    if (sidebar) sidebar.classList.remove("open");
+    if (overlay) overlay.classList.remove("open");
+}
+
 // ---------- GUARDA DE SESSÃO ----------
 // Chame no topo de qualquer página que exija login (dashboard,
 // produtos, vendas, etc — equivalente ao @login_required do Flask).
