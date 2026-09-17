@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recuperar senha - Kroche Manager</title>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <h1>Recuperar senha</h1>
+        <p class="subtitulo">Enviaremos um link para o seu e-mail</p>
+
+        <div id="alerta" class="alerta"></div>
+
+        <form id="form-recuperar">
+            <label class="form-label">E-mail</label>
+            <input type="email" id="email" class="form-control" required autofocus>
+
+            <button type="submit" class="btn-marrom" id="btn-enviar">Enviar link</button>
+        </form>
+
+        <div class="auth-links">
+            <a href="login.html">Voltar para o login</a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/supabaseConfig.js"></script>
+<script src="assets/js/auth.js"></script>
+<script>
+    document.getElementById("form-recuperar").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("btn-enviar");
+        btn.disabled = true;
+        btn.textContent = "Enviando...";
+
+        await pedirRecuperacaoSenha(document.getElementById("email").value);
+
+        btn.disabled = false;
+        btn.textContent = "Enviar link";
+    });
+</script>
+</body>
+</html>

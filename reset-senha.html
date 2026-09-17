@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nova senha - Kroche Manager</title>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <h1>Escolha uma nova senha</h1>
+        <p class="subtitulo">&nbsp;</p>
+
+        <div id="alerta" class="alerta"></div>
+
+        <form id="form-reset">
+            <label class="form-label">Nova senha</label>
+            <input type="password" id="senha" class="form-control" required minlength="8">
+
+            <label class="form-label">Confirmar nova senha</label>
+            <input type="password" id="confirmar" class="form-control" required minlength="8">
+
+            <button type="submit" class="btn-marrom" id="btn-salvar">Salvar nova senha</button>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/supabaseConfig.js"></script>
+<script src="assets/js/auth.js"></script>
+<script>
+    document.getElementById("form-reset").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("btn-salvar");
+        btn.disabled = true;
+        btn.textContent = "Salvando...";
+
+        await redefinirSenha(
+            document.getElementById("senha").value,
+            document.getElementById("confirmar").value
+        );
+
+        btn.disabled = false;
+        btn.textContent = "Salvar nova senha";
+    });
+</script>
+</body>
+</html>

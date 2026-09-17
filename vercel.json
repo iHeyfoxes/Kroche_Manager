@@ -1,0 +1,68 @@
+{
+  "rewrites": [
+    {
+      "source": "/minha-loja",
+      "destination": "/minha-loja.html"
+    },
+    {
+      "source": "/minha-loja/editar",
+      "destination": "/minha-loja-editar.html"
+    },
+    {
+      "source": "/produtos",
+      "destination": "/produtos.html"
+    },
+    {
+      "source": "/vendas",
+      "destination": "/vendas.html"
+    },
+    {
+      "source": "/compras",
+      "destination": "/compras.html"
+    },
+    {
+      "source": "/receitas",
+      "destination": "/receitas.html"
+    },
+    {
+      "source": "/encomendas",
+      "destination": "/encomendas.html"
+    },
+    {
+      "source": "/leads",
+      "destination": "/leads.html"
+    },
+    {
+      "source": "/relatorios",
+      "destination": "/relatorios.html"
+    },
+    {
+      "source": "/calculadora",
+      "destination": "/calculadora.html"
+    },
+    {
+      "source": "/perfil",
+      "destination": "/perfil.html"
+    },
+    {
+      "source": "/politica-de-privacidade",
+      "destination": "/politica-de-privacidade.html"
+    },
+    {
+      "source": "/termos-de-uso",
+      "destination": "/termos-de-uso.html"
+    },
+    {
+      "source": "/loja/:slug",
+      "destination": "/loja/index.html?slug=:slug"
+    },
+    {
+      "source": "/loja/:slug/produto/:id",
+      "destination": "/loja/produto.html?slug=:slug&id=:id"
+    },
+    {
+      "source": "/loja/:slug/carrinho",
+      "destination": "/loja/carrinho.html?slug=:slug"
+    }
+  ]
+}

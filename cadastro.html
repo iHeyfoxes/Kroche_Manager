@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Criar conta - Kroche Manager</title>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <h1>Criar conta</h1>
+        <p class="subtitulo">Comece a organizar seu ateliê</p>
+
+        <div id="alerta" class="alerta"></div>
+
+        <form id="form-cadastro">
+            <label class="form-label">Nome</label>
+            <input type="text" id="nome" class="form-control" required autofocus>
+
+            <label class="form-label">E-mail</label>
+            <input type="email" id="email" class="form-control" required>
+
+            <label class="form-label">Senha</label>
+            <input type="password" id="senha" class="form-control" required minlength="8">
+
+            <label class="form-label">Confirmar senha</label>
+            <input type="password" id="confirmar_senha" class="form-control" required minlength="8">
+
+            <div class="form-check">
+                <input type="checkbox" id="termos">
+                <label for="termos">Li e aceito os <a href="termos-uso.html" target="_blank">Termos de Uso</a></label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" id="privacidade">
+                <label for="privacidade">Li e aceito a <a href="politica-privacidade.html" target="_blank">Política de Privacidade</a></label>
+            </div>
+
+            <button type="submit" class="btn-marrom" id="btn-criar">Criar conta</button>
+        </form>
+
+        <div class="auth-links">
+            Já tem conta? <a href="login.html">Entrar</a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/supabaseConfig.js"></script>
+<script src="assets/js/auth.js"></script>
+<script>
+    document.getElementById("form-cadastro").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("btn-criar");
+        btn.disabled = true;
+        btn.textContent = "Criando...";
+
+        await fazerCadastro({
+            nome: document.getElementById("nome").value,
+            email: document.getElementById("email").value,
+            senha: document.getElementById("senha").value,
+            confirmarSenha: document.getElementById("confirmar_senha").value,
+            termos: document.getElementById("termos").checked,
+            privacidade: document.getElementById("privacidade").checked,
+        });
+
+        btn.disabled = false;
+        btn.textContent = "Criar conta";
+    });
+</script>
+</body>
+</html>
