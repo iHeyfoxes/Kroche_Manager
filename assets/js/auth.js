@@ -81,7 +81,7 @@ async function fazerCadastro({ nome, email, senha, confirmarSenha, termos, priva
 // ---------- ESQUECI A SENHA ----------
 async function pedirRecuperacaoSenha(email) {
     const { error } = await supabaseClient.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: window.location.origin + window.location.pathname.replace("esqueci-senha.html", "reset-senha.html"),
+        redirectTo: "https://krochemanager.com.br/reset-senha.html",
     });
 
     // Igual ao comportamento original: não revela se o e-mail existe ou não.

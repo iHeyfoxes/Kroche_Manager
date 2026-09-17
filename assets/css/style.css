@@ -1,3 +1,9 @@
+/* ==========================================================
+   Kroche Manager - Estilos globais complementares
+   (a maior parte da paleta e do tema já vive em base.html;
+   este arquivo cobre responsividade, scrollbar e detalhes finos)
+   ========================================================== */
+
 :root {
     --marrom-principal: #6B4E3D;
     --marrom-escuro: #4E3629;
@@ -5,112 +11,98 @@
     --fundo-claro: #FAF6F0;
 }
 
-* { box-sizing: border-box; }
-
-body {
-    margin: 0;
-    font-family: "Segoe UI", system-ui, sans-serif;
-    background: var(--fundo-claro);
-    color: var(--marrom-escuro);
+/* Scrollbar customizada (Chrome/Edge/Safari) */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
 }
 
-/* ---------- Telas de autenticação ---------- */
-.auth-wrapper {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-}
-
-.auth-card {
-    width: 100%;
-    max-width: 420px;
-    background: #fff;
-    border-radius: 16px;
-    padding: 36px 32px;
-    box-shadow: 0 10px 30px rgba(78, 54, 41, 0.10);
-}
-
-.auth-card h1 {
-    font-size: 22px;
-    color: var(--marrom-escuro);
-    margin: 0 0 4px;
-    text-align: center;
-}
-
-.auth-card p.subtitulo {
-    text-align: center;
-    color: #8a7a6d;
-    margin: 0 0 24px;
-    font-size: 14px;
-}
-
-.form-label {
-    display: block;
-    font-size: 14px;
-    font-weight: 600;
-    margin: 14px 0 6px;
-    color: var(--marrom-escuro);
-}
-
-.form-control {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #e3d7c9;
-    border-radius: 8px;
-    font-size: 15px;
+::-webkit-scrollbar-track {
     background: var(--fundo-claro);
 }
 
-.form-control:focus {
-    outline: 2px solid var(--marrom-principal);
-    outline-offset: 1px;
+::-webkit-scrollbar-thumb {
+    background: #d8c7b6;
+    border-radius: 10px;
 }
 
-.form-check {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    margin-top: 12px;
-    font-size: 13px;
-    color: #6b5c4f;
-}
-
-.btn-marrom {
-    width: 100%;
-    margin-top: 20px;
-    padding: 11px;
-    border: none;
-    border-radius: 8px;
+::-webkit-scrollbar-thumb:hover {
     background: var(--marrom-principal);
-    color: #fff;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s ease;
 }
 
-.btn-marrom:hover { background: var(--marrom-escuro); }
-.btn-marrom:disabled { opacity: 0.6; cursor: default; }
-
-.auth-links {
-    margin-top: 18px;
-    text-align: center;
-    font-size: 13px;
+/* Cards: leve elevação ao passar o mouse, para dar sensação de interatividade */
+.card {
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-.auth-links a { color: var(--marrom-principal); text-decoration: none; }
-.auth-links a:hover { text-decoration: underline; }
-
-.alerta {
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    margin-top: 16px;
-    display: none;
+.card:hover {
+    box-shadow: 0 6px 18px rgba(78, 54, 41, 0.06);
 }
 
-.alerta.erro { background: #fdecea; color: #b3261e; display: block; }
-.alerta.sucesso { background: #e8f5e9; color: #256029; display: block; }
-.alerta.info { background: var(--creme-suave); color: var(--marrom-escuro); display: block; }
+/* Badges de status usados em encomendas */
+.badge.bg-secondary {
+    background-color: var(--marrom-principal) !important;
+}
+
+/* Foco visível para acessibilidade (teclado) */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid var(--marrom-principal);
+    outline-offset: 2px;
+}
+
+/* Empty states (mensagens de "nenhum item cadastrado") */
+.text-center.text-muted.py-4 {
+    font-size: 14px;
+}
+
+/* ==========================================================
+   RESPONSIVO — a sidebar do base.html é fixa em 260px;
+   em telas estreitas ela vira uma barra superior colapsada
+   ========================================================== */
+@media (max-width: 768px) {
+    .sidebar {
+        position: relative;
+        width: 100% !important;
+        height: auto;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 12px;
+    }
+
+    .sidebar .logo {
+        width: 100%;
+        padding: 8px 12px;
+    }
+
+    .sidebar ul {
+        flex-direction: row;
+        flex-wrap: wrap;
+        height: auto;
+        width: 100%;
+    }
+
+    .sidebar ul li {
+        flex: 1 1 auto;
+    }
+
+    .sidebar ul li a {
+        padding: 8px 12px;
+        font-size: 14px;
+        text-align: center;
+    }
+
+    .sidebar ul li.mt-auto {
+        margin-top: 0 !important;
+    }
+
+    main.conteudo {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 16px !important;
+    }
+}/* Ajustes modernos das telas de autenticação */
+.auth-card{background:transparent;box-shadow:none;padding:0;max-width:380px}.auth-card h1{text-align:left}.auth-card p.subtitulo{text-align:left}.auth-wrapper{padding:0}.coluna-form{background:#fffaf5}.form-control{background:#fff}.btn-marrom{width:100%}@media(max-width:900px){.coluna-cenario{min-height:170px!important}.coluna-form{min-height:auto!important;padding:2rem 1.5rem!important}.auth-container{margin:auto}.cena-conteudo{display:none!important}}
