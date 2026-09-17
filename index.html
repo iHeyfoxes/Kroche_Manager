@@ -1,14 +1,36 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kroche Manager</title>
-
-    <meta http-equiv="refresh" content="0; url=login.html">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kroche Manager</title>
+<style>
+body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:Arial,sans-serif;background:#f7f2ed;color:#3d2b1f}.box{text-align:center;padding:30px}h1{margin-bottom:8px}p{opacity:.75}a{display:inline-block;margin-top:12px;padding:12px 20px;border-radius:8px;background:#6b4630;color:#fff;text-decoration:none}
+</style>
 </head>
-
 <body>
-    <p>Redirecionando para o Kroche Manager...</p>
+<div class="box"><h1>Kroche Manager</h1><p>Carregando o sistema...</p><a href="login.html">Entrar no sistema</a></div>
+<script>
+(async function(){
+  function irLogin(){ window.location.replace('login.html'); }
+  try {
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    s.onload=function(){
+      const c=document.createElement('script');
+      c.src='assets/js/supabaseConfig.js';
+      c.onload=async function(){
+        try{const r=await window.supabaseClient.auth.getSession();window.location.replace(r.data.session?'dashboard.html':'login.html');}
+        catch(e){irLogin();}
+      };
+      c.onerror=irLogin;
+      document.head.appendChild(c);
+    };
+    s.onerror=irLogin;
+    document.head.appendChild(s);
+    setTimeout(irLogin,5000);
+  } catch(e){irLogin();}
+})();
+</script>
 </body>
 </html>
