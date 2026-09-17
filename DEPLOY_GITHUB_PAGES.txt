@@ -1,0 +1,14 @@
+KROCHE MANAGER — DEPLOY GITHUB PAGES
+
+1. Extraia este ZIP.
+2. Envie o CONTEÚDO da pasta Kroche-Manager-Melhorado para a raiz do repositório Heyfoxes/Kroche_Manager na branch main.
+3. Preserve o arquivo CNAME.
+4. Em Settings > Pages, use Deploy from a branch: main / (root).
+5. Aguarde a publicação.
+
+Testes após publicar:
+https://krochemanager.com.br/login.html
+https://krochemanager.com.br/assets/css/app.css
+https://krochemanager.com.br/assets/js/app.js
+
+As duas últimas URLs devem exibir o código dos arquivos. O login.html deve carregar estilizado.
