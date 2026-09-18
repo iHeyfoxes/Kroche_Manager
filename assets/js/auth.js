@@ -133,10 +133,17 @@ async function exigirLogin() {
 // ---------- IDENTIDADE VISUAL GLOBAL ----------
 // Carrega os refinamentos visuais em todas as páginas que utilizam auth.js.
 (function carregarEstiloPremium() {
-    if (document.querySelector('link[data-kroche-premium]')) return;
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'assets/css/premium.css';
-    link.dataset.krochePremium = 'true';
-    document.head.appendChild(link);
+    const estilos = [
+        'assets/css/premium.css',
+        'assets/css/professional.css'
+    ];
+
+    estilos.forEach((href) => {
+        if (document.querySelector(`link[data-kroche-style="${href}"]`)) return;
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = href;
+        link.dataset.krocheStyle = href;
+        document.head.appendChild(link);
+    });
 })();
