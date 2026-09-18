@@ -3,45 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Criar conta - Kroche Manager</title>
+<meta name="theme-color" content="#6B4E3D">
+<title>Criar conta | Kroche Manager</title>
 <link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/premium.css">
+<link rel="stylesheet" href="assets/css/professional.css">
 </head>
 <body>
 <div class="auth-wrapper">
     <div class="auth-card">
-        <h1>Criar conta</h1>
-        <p class="subtitulo">Comece a organizar seu ateliê</p>
+        <div class="kroche-auth-brand"><span class="kroche-brand-mark">🧶</span><span>Kroche <b>Manager</b></span></div>
+        <span class="kroche-auth-kicker">COMECE SEU ATELIÊ DIGITAL</span>
+        <h1>Criar sua conta</h1>
+        <p class="subtitulo">Organize sua produção e cuide do seu negócio com mais tranquilidade.</p>
 
-        <div id="alerta" class="alerta"></div>
+        <div id="alerta" class="alerta" role="alert"></div>
 
         <form id="form-cadastro">
-            <label class="form-label">Nome</label>
-            <input type="text" id="nome" class="form-control" required autofocus>
+            <label class="form-label" for="nome">Seu nome</label>
+            <input type="text" id="nome" class="form-control" placeholder="Como podemos chamar você?" autocomplete="name" required autofocus>
 
-            <label class="form-label">E-mail</label>
-            <input type="email" id="email" class="form-control" required>
+            <label class="form-label" for="nicho">Qual é o seu nicho?</label>
+            <select id="nicho" class="form-control" required>
+                <option value="" disabled selected>Selecione seu tipo de artesanato</option>
+                <option value="Crochê e Amigurumi">Crochê e Amigurumi</option>
+                <option value="Costura e Confecção">Costura e Confecção</option>
+                <option value="Bordado">Bordado</option>
+                <option value="Papelaria e Personalizados">Papelaria e Personalizados</option>
+                <option value="Velas e Aromas">Velas e Aromas</option>
+                <option value="Confeitaria e Doces">Confeitaria e Doces</option>
+                <option value="Outro">Outro</option>
+            </select>
 
-            <label class="form-label">Senha</label>
-            <input type="password" id="senha" class="form-control" required minlength="8">
+            <label class="form-label" for="email">E-mail</label>
+            <input type="email" id="email" class="form-control" placeholder="voce@exemplo.com" autocomplete="email" required>
 
-            <label class="form-label">Confirmar senha</label>
-            <input type="password" id="confirmar_senha" class="form-control" required minlength="8">
+            <label class="form-label" for="senha">Senha</label>
+            <input type="password" id="senha" class="form-control" placeholder="Mínimo de 8 caracteres" autocomplete="new-password" required minlength="8">
 
-            <div class="form-check">
-                <input type="checkbox" id="termos">
-                <label for="termos">Li e aceito os <a href="termos-de-uso.html" target="_blank">Termos de Uso</a></label>
-            </div>
-            <div class="form-check">
-                <input type="checkbox" id="privacidade">
-                <label for="privacidade">Li e aceito a <a href="politica-de-privacidade.html" target="_blank">Política de Privacidade</a></label>
-            </div>
+            <label class="form-label" for="confirmar_senha">Confirmar senha</label>
+            <input type="password" id="confirmar_senha" class="form-control" placeholder="Repita sua senha" autocomplete="new-password" required minlength="8">
 
-            <button type="submit" class="btn-marrom" id="btn-criar">Criar conta</button>
+            <div class="form-check"><input type="checkbox" id="termos" required><label for="termos">Li e aceito os <a href="termos-de-uso.html" target="_blank">Termos de Uso</a></label></div>
+            <div class="form-check"><input type="checkbox" id="privacidade" required><label for="privacidade">Li e aceito a <a href="politica-de-privacidade.html" target="_blank">Política de Privacidade</a></label></div>
+
+            <button type="submit" class="btn-marrom kroche-primary-button" id="btn-criar">Criar minha conta <span>→</span></button>
         </form>
-
-        <div class="auth-links">
-            Já tem conta? <a href="login.html">Entrar</a>
-        </div>
+        <div class="auth-links">Já tem conta? <a href="login.html">Entrar</a></div>
     </div>
 </div>
 
@@ -54,18 +62,17 @@
         const btn = document.getElementById("btn-criar");
         btn.disabled = true;
         btn.textContent = "Criando...";
-
         await fazerCadastro({
             nome: document.getElementById("nome").value,
+            nicho: document.getElementById("nicho").value,
             email: document.getElementById("email").value,
             senha: document.getElementById("senha").value,
             confirmarSenha: document.getElementById("confirmar_senha").value,
             termos: document.getElementById("termos").checked,
             privacidade: document.getElementById("privacidade").checked,
         });
-
         btn.disabled = false;
-        btn.textContent = "Criar conta";
+        btn.innerHTML = "Criar minha conta <span>→</span>";
     });
 </script>
 </body>
