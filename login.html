@@ -5,77 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Entrar | Kroche Manager</title>
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/professional.css">
 </head>
 <body class="kroche-auth-page">
     <main class="kroche-auth-shell">
         <section class="kroche-auth-form-panel" aria-label="Acesso ao Kroche Manager">
-            <div class="kroche-auth-brand">
-                <span class="kroche-brand-mark" aria-hidden="true">🧶</span>
-                <span>Kroche <b>Manager</b></span>
-            </div>
-
+            <div class="kroche-auth-brand"><span class="kroche-brand-mark" aria-hidden="true">🧶</span><span>Kroche <b>Manager</b></span></div>
             <div class="kroche-auth-form-wrap">
                 <span class="kroche-auth-kicker">SEU ATELIÊ, MAIS PROFISSIONAL</span>
                 <h1>Bem-vindo de volta.</h1>
                 <p class="kroche-auth-lead">Organize sua produção, acompanhe suas vendas e cuide do seu negócio em um só lugar.</p>
-
                 <div id="alerta" class="alerta" role="alert"></div>
-
                 <form id="form-login" class="kroche-login-form">
-                    <div class="kroche-field">
-                        <label class="form-label" for="email">E-mail</label>
-                        <input type="email" id="email" class="form-control" placeholder="voce@exemplo.com" autocomplete="email" required autofocus>
-                    </div>
-                    <div class="kroche-field">
-                        <div class="kroche-label-row">
-                            <label class="form-label" for="senha">Senha</label>
-                            <a href="esqueci-senha.html">Esqueci minha senha</a>
-                        </div>
-                        <input type="password" id="senha" class="form-control" placeholder="Digite sua senha" autocomplete="current-password" required>
-                    </div>
+                    <div class="kroche-field"><label class="form-label" for="email">E-mail</label><input type="email" id="email" class="form-control" placeholder="voce@exemplo.com" autocomplete="email" required autofocus></div>
+                    <div class="kroche-field"><div class="kroche-label-row"><label class="form-label" for="senha">Senha</label><a href="esqueci-senha.html">Esqueci minha senha</a></div><input type="password" id="senha" class="form-control" placeholder="Digite sua senha" autocomplete="current-password" required></div>
                     <button type="submit" class="btn-marrom kroche-primary-button" id="btn-entrar">Entrar na minha conta <span aria-hidden="true">→</span></button>
                 </form>
-
+                <div class="kroche-auth-divider" aria-hidden="true"><span>ou</span></div>
+                <button type="button" class="btn-google kroche-google-button" id="btn-google">Continuar com Google</button>
                 <p class="kroche-auth-register">Ainda não tem uma conta? <a href="cadastro.html">Crie sua conta gratuitamente</a></p>
             </div>
-
             <p class="kroche-auth-footer">© 2026 Kroche Manager · Gestão feita para quem cria à mão.</p>
         </section>
-
-        <section class="kroche-auth-visual" aria-label="Benefícios do Kroche Manager">
-            <div class="kroche-visual-orbit kroche-orbit-one"></div>
-            <div class="kroche-visual-orbit kroche-orbit-two"></div>
-            <div class="kroche-visual-thread kroche-thread-one"></div>
-            <div class="kroche-visual-thread kroche-thread-two"></div>
-
-            <div class="kroche-visual-content">
-                <span class="kroche-visual-badge">✦ FEITO PARA ARTESÃOS</span>
-                <h2>Mais tempo criando.<br><em>Menos tempo organizando.</em></h2>
-                <p>Tenha clareza sobre cada pedido, cada cliente e cada detalhe do seu ateliê.</p>
-
-                <div class="kroche-benefit-list">
-                    <div class="kroche-benefit"><span>✓</span><div><strong>Pedidos sob controle</strong><small>Acompanhe cada encomenda do início à entrega.</small></div></div>
-                    <div class="kroche-benefit"><span>✓</span><div><strong>Finanças mais claras</strong><small>Veja vendas, custos e resultados com facilidade.</small></div></div>
-                    <div class="kroche-benefit"><span>✓</span><div><strong>Seu catálogo online</strong><small>Mostre suas peças e receba pedidos pelo WhatsApp.</small></div></div>
-                </div>
-            </div>
-            <div class="kroche-visual-signature">KROCHE <span>·</span> FEITO À MÃO, GERIDO COM CARINHO</div>
-        </section>
+        <section class="kroche-auth-visual" aria-label="Benefícios do Kroche Manager"><div class="kroche-visual-orbit kroche-orbit-one"></div><div class="kroche-visual-orbit kroche-orbit-two"></div><div class="kroche-visual-thread kroche-thread-one"></div><div class="kroche-visual-thread kroche-thread-two"></div><div class="kroche-visual-content"><span class="kroche-visual-badge">✦ FEITO PARA ARTESÃOS</span><h2>Mais tempo criando.<br><em>Menos tempo organizando.</em></h2><p>Tenha clareza sobre cada pedido, cada cliente e cada detalhe do seu ateliê.</p><div class="kroche-benefit-list"><div class="kroche-benefit"><span>✓</span><div><strong>Pedidos sob controle</strong><small>Acompanhe cada encomenda do início à entrega.</small></div></div><div class="kroche-benefit"><span>✓</span><div><strong>Finanças mais claras</strong><small>Veja vendas, custos e resultados com facilidade.</small></div></div><div class="kroche-benefit"><span>✓</span><div><strong>Seu catálogo online</strong><small>Mostre suas peças e receba pedidos pelo WhatsApp.</small></div></div></div></div><div class="kroche-visual-signature">KROCHE <span>·</span> FEITO À MÃO, GERIDO COM CARINHO</div></section>
     </main>
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="assets/js/supabaseConfig.js"></script>
     <script src="assets/js/auth.js"></script>
     <script>
-        document.getElementById('form-login').addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const button = document.getElementById('btn-entrar');
-            button.disabled = true;
-            button.innerHTML = 'Entrando...';
-            await fazerLogin(document.getElementById('email').value, document.getElementById('senha').value);
-            button.disabled = false;
-            button.innerHTML = 'Entrar na minha conta <span aria-hidden="true">→</span>';
-        });
+        document.getElementById('form-login').addEventListener('submit', async (event) => { event.preventDefault(); const button = document.getElementById('btn-entrar'); button.disabled = true; button.innerHTML = 'Entrando...'; await fazerLogin(document.getElementById('email').value, document.getElementById('senha').value); button.disabled = false; button.innerHTML = 'Entrar na minha conta <span aria-hidden="true">→</span>'; });
+        document.getElementById('btn-google').addEventListener('click', async () => { const button = document.getElementById('btn-google'); button.disabled = true; button.textContent = 'Conectando...'; await fazerLoginGoogle(); button.disabled = false; button.textContent = 'Continuar com Google'; });
     </script>
 </body>
 </html>
