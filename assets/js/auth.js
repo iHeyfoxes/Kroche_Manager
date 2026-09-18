@@ -115,14 +115,15 @@ async function exigirLogin() {
     return session.user;
 }
 
-(function carregarEstiloPremium() {
-    const estilos = ["assets/css/premium.css", "assets/css/professional.css"];
-    estilos.forEach((href) => {
-        if (document.querySelector(`link[data-kroche-style="${href}"]`)) return;
-        const link = document.createElement("link");
-        link.rel = "stylesheet";
-        link.href = href;
-        link.dataset.krocheStyle = href;
-        document.head.appendChild(link);
-    });
+// Carrega somente o arquivo de estilo existente, evitando uma requisição
+// desnecessária para premium.css, que não faz parte da estrutura atual.
+(function carregarEstiloKroche() {
+    const href = "assets/css/professional.css";
+    if (document.querySelector(`link[data-kroche-style="${href}"]`)) return;
+
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = href;
+    link.dataset.krocheStyle = href;
+    document.head.appendChild(link);
 })();
