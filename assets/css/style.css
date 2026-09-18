@@ -1,7 +1,5 @@
 /* ==========================================================
    Kroche Manager - Estilos globais complementares
-   (a maior parte da paleta e do tema já vive em base.html;
-   este arquivo cobre responsividade, scrollbar e detalhes finos)
    ========================================================== */
 
 :root {
@@ -11,137 +9,112 @@
     --fundo-claro: #FAF6F0;
 }
 
-/* Scrollbar customizada (Chrome/Edge/Safari) */
-::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-}
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--fundo-claro); }
+::-webkit-scrollbar-thumb { background: #d8c7b6; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--marrom-principal); }
 
-::-webkit-scrollbar-track {
-    background: var(--fundo-claro);
-}
+.card { transition: box-shadow .2s ease, transform .2s ease; }
+.card:hover { box-shadow: 0 6px 18px rgba(78,54,41,.06); }
+.badge.bg-secondary { background-color: var(--marrom-principal) !important; }
 
-::-webkit-scrollbar-thumb {
-    background: #d8c7b6;
-    border-radius: 10px;
-}
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--marrom-principal); outline-offset: 2px; }
+.text-center.text-muted.py-4 { font-size: 14px; }
 
-::-webkit-scrollbar-thumb:hover {
-    background: var(--marrom-principal);
-}
-
-/* Cards: leve elevação ao passar o mouse, para dar sensação de interatividade */
-.card {
-    transition: box-shadow 0.2s ease, transform 0.2s ease;
-}
-
-.card:hover {
-    box-shadow: 0 6px 18px rgba(78, 54, 41, 0.06);
-}
-
-/* Badges de status usados em encomendas */
-.badge.bg-secondary {
-    background-color: var(--marrom-principal) !important;
-}
-
-/* Foco visível para acessibilidade (teclado) */
-a:focus-visible,
-button:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-    outline: 2px solid var(--marrom-principal);
-    outline-offset: 2px;
-}
-
-/* Empty states (mensagens de "nenhum item cadastrado") */
-.text-center.text-muted.py-4 {
-    font-size: 14px;
-}
-
-/* ==========================================================
-   RESPONSIVO — a sidebar do base.html é fixa em 260px;
-   em telas estreitas ela vira uma barra superior colapsada
-   ========================================================== */
 @media (max-width: 768px) {
-    .sidebar {
-        position: relative;
-        width: 100% !important;
-        height: auto;
-        flex-direction: row;
-        flex-wrap: wrap;
-        padding: 12px;
-    }
-
-    .sidebar .logo {
-        width: 100%;
-        padding: 8px 12px;
-    }
-
-    .sidebar ul {
-        flex-direction: row;
-        flex-wrap: wrap;
-        height: auto;
-        width: 100%;
-    }
-
-    .sidebar ul li {
-        flex: 1 1 auto;
-    }
-
-    .sidebar ul li a {
-        padding: 8px 12px;
-        font-size: 14px;
-        text-align: center;
-    }
-
-    .sidebar ul li.mt-auto {
-        margin-top: 0 !important;
-    }
-
-    main.conteudo {
-        margin-left: 0 !important;
-        width: 100% !important;
-        padding: 16px !important;
-    }
-}/* Ajustes modernos das telas de autenticação */
-.auth-card{background:transparent;box-shadow:none;padding:0;max-width:380px}.auth-card h1{text-align:left}.auth-card p.subtitulo{text-align:left}.auth-wrapper{padding:0}.coluna-form{background:#fffaf5}.form-control{background:#fff}.btn-marrom{width:100%}@media(max-width:900px){.coluna-cenario{min-height:170px!important}.coluna-form{min-height:auto!important;padding:2rem 1.5rem!important}.auth-container{margin:auto}.cena-conteudo{display:none!important}}
+    .sidebar { position: relative; width: 100% !important; height: auto; flex-direction: row; flex-wrap: wrap; padding: 12px; }
+    .sidebar .logo { width: 100%; padding: 8px 12px; }
+    .sidebar ul { flex-direction: row; flex-wrap: wrap; height: auto; width: 100%; }
+    .sidebar ul li { flex: 1 1 auto; }
+    .sidebar ul li a { padding: 8px 12px; font-size: 14px; text-align: center; }
+    .sidebar ul li.mt-auto { margin-top: 0 !important; }
+    main.conteudo { margin-left: 0 !important; width: 100% !important; padding: 16px !important; }
+}
 
 /* ==========================================================
-   LOGIN / AUTENTICAÇÃO — layout recuperado e independente
+   AUTENTICAÇÃO — identidade premium Kroche
    ========================================================== */
-body:has(.coluna-form){margin:0;min-height:100vh;font-family:Karla,Arial,sans-serif;background:#f8f1e8;color:#4e3629;display:grid;grid-template-columns:44% 56%;overflow-x:hidden}
-.coluna-form{min-height:100vh;background:#f8f1e8;display:flex;flex-direction:column;padding:42px 7vw 42px 7vw;box-sizing:border-box}
-.marca-topo{display:flex;align-items:center;gap:10px;font-family:Georgia,serif;font-size:22px;font-weight:700;color:#4e3629}
-.auth-container{width:100%;max-width:430px;margin:auto}
-.auth-card{width:100%;box-sizing:border-box;background:transparent;padding:0;box-shadow:none}
-.auth-card h1{font-family:Georgia,serif;font-size:40px;line-height:1.08;margin:0 0 10px;color:#4e3629;text-align:left}
-.auth-card .subtitulo{margin:0 0 30px;color:#81756c;font-size:16px;text-align:left}
-.form-label{display:block;margin:0 0 7px;font-size:14px;font-weight:700;color:#5b4639}
-.form-control{display:block;width:100%;box-sizing:border-box;border:1px solid #d9c9b8;border-radius:8px;background:#fff;padding:13px 14px;margin:0 0 18px;color:#4e3629;font-size:15px;outline:none}
-.form-control:focus{border-color:#6b4e3d;box-shadow:0 0 0 3px rgba(107,78,61,.12)}
-.btn-marrom{display:block;width:100%;border:0;border-radius:8px;background:#6b4e3d;color:#fff;padding:13px 16px;font-weight:700;font-size:15px;cursor:pointer;transition:.2s}
-.btn-marrom:hover{background:#4e3629}
-.btn-marrom:disabled{opacity:.65;cursor:wait}
-.auth-links{text-align:center;margin-top:24px;color:#81756c;font-size:14px;line-height:1.35}
-.auth-links a{color:#6b4e3d;font-weight:700;text-decoration:none}
-.auth-links a:hover{text-decoration:underline}
-.alerta{display:none;padding:11px 13px;margin-bottom:16px;border-radius:8px;background:#fdecea;color:#a33a2b;font-size:14px}
-.coluna-cenario{position:relative;min-height:100vh;background:linear-gradient(145deg,#4e3629 0%,#34231d 58%,#211714 100%);overflow:hidden;display:flex;align-items:center;padding:8vw;box-sizing:border-box;color:#fff}
-.coluna-cenario .brilho{position:absolute;width:520px;height:520px;border-radius:50%;background:rgba(214,166,102,.12);filter:blur(20px);right:-180px;top:-140px}
-.cena-conteudo{position:relative;z-index:2;max-width:570px}
-.eyebrow{display:inline-block;color:#e4bd7a;text-transform:uppercase;letter-spacing:2px;font-size:12px;font-weight:700;margin-bottom:20px}
-.cena-conteudo h2{font-family:Georgia,serif;font-size:clamp(38px,4vw,62px);line-height:1.05;margin:0 0 22px;font-weight:700}
-.cena-conteudo p{font-size:18px;line-height:1.65;color:rgba(255,255,255,.78);max-width:510px;margin:0}
-.novelo{position:absolute;border-radius:50%;background:radial-gradient(circle at 35% 28%,#a8613f 0%,#6b3a2c 58%,#3f2016 100%);box-shadow:0 20px 45px rgba(0,0,0,.28);opacity:.75}
-.novelo:after{content:"";position:absolute;inset:14%;border:2px solid rgba(255,255,255,.08);border-radius:50%}
-.n1{width:120px;height:120px;right:12%;top:12%}.n2{width:70px;height:70px;right:30%;bottom:13%}.n3{width:48px;height:48px;right:8%;bottom:28%}.n4{width:32px;height:32px;left:9%;bottom:10%}
-@media(max-width:900px){body:has(.coluna-form){display:flex;flex-direction:column;overflow:auto}.coluna-cenario{order:-1;min-height:210px;height:210px;padding:28px 24px;align-items:flex-end}.cena-conteudo{max-width:100%}.cena-conteudo h2{font-size:28px;margin-bottom:0}.cena-conteudo p,.eyebrow{display:none}.coluna-form{min-height:calc(100vh - 210px);padding:25px 24px 35px}.marca-topo{font-size:19px}.auth-container{max-width:520px}.auth-card h1{font-size:32px}}
-@media(max-width:520px){.coluna-cenario{min-height:150px;height:150px}.coluna-form{min-height:calc(100vh - 150px);padding:22px 18px 30px}.auth-card h1{font-size:29px}.form-control{margin-bottom:14px}.n1{width:75px;height:75px;right:8%;top:10%}.n2{width:45px;height:45px;right:28%;bottom:10%}}
-/* Recuperação de senha: tela centralizada e responsiva */
-body.auth-simple{min-height:100vh;margin:0;background:linear-gradient(135deg,#f8f1e8,#efe2d3);display:grid;place-items:center;padding:24px;font-family:Karla,Arial,sans-serif;color:#4e3629}.auth-simple .auth-card{width:min(100%,460px);background:#fff;border:1px solid #e1d3c3;border-radius:18px;padding:38px;box-shadow:0 20px 60px rgba(78,54,41,.14)}.auth-simple .auth-logo{display:flex;align-items:center;gap:9px;font-family:Georgia,serif;font-weight:700;font-size:20px;margin-bottom:30px}.auth-simple .auth-logo span:first-child{font-size:26px}.auth-simple h1{font-family:Georgia,serif;font-size:32px;margin:0 0 9px;text-align:left}.auth-simple .subtitulo{text-align:left;margin:0 0 25px;color:#81756c}.auth-simple .auth-links{text-align:center;margin-top:22px}.auth-simple .alerta.sucesso{display:block;background:#eaf5e7;color:#3e6a38}.auth-simple .alerta.info{display:block;background:#eee7df;color:#5e5047}.auth-simple .alerta.erro{display:block;background:#fdecea;color:#a33a2b}.auth-simple .back-home{display:inline-flex;margin-top:4px;color:#6b4e3d;text-decoration:none;font-size:13px;font-weight:700}.dark-auth{background:#161210!important;color:#fff!important}.dark-auth .auth-card{background:#251d1a;border-color:#3b2d27}.dark-auth .auth-simple,.dark-auth .form-label{color:#fff}.dark-auth .form-control{background:#382b26;color:#fff;border-color:#4b3930}.dark-auth .subtitulo,.dark-auth .auth-links{color:#b9aaa0}.dark-auth .auth-links a,.dark-auth .back-home{color:#e0b574}@media(max-width:520px){.auth-simple{padding:14px}.auth-simple .auth-card{padding:28px 22px}.auth-simple h1{font-size:28px}}
+body:has(.kroche-auth-page) {
+    margin: 0;
+    min-height: 100vh;
+    background: #f8f2ea;
+    color: #4e3629;
+    font-family: Karla, Arial, sans-serif;
+}
 
-/* Recuperação de senha - centralização e responsividade */
-body.auth-simple{min-height:100vh;display:grid;place-items:center;padding:24px;background:var(--fundo-claro,#FAF6F0)}
-body.auth-simple .auth-card{width:min(460px,100%);margin:0 auto;box-sizing:border-box}
-@media(max-width:520px){body.auth-simple{padding:16px}body.auth-simple .auth-card{padding:24px 20px}}
+.kroche-auth-page { min-height: 100vh; }
+.kroche-auth-shell { min-height: 100vh; display: grid; grid-template-columns: minmax(390px, 43%) 1fr; }
+.kroche-auth-form-panel { display: flex; flex-direction: column; padding: 38px clamp(28px, 5vw, 86px); background: #fcf8f3; }
+.kroche-auth-brand { display: flex; align-items: center; gap: 11px; color: #4e3629; font-family: Georgia, serif; font-size: 23px; letter-spacing: -.5px; }
+.kroche-auth-brand b { font-weight: 400; }
+.kroche-brand-mark { display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid #d8c1aa; border-radius: 12px; background: #f0e1d0; font-size: 21px; }
+.kroche-auth-form-wrap { width: 100%; max-width: 430px; margin: auto; padding: 50px 0; }
+.kroche-auth-kicker { display: inline-block; margin-bottom: 18px; color: #9a704d; font-size: 11px; font-weight: 800; letter-spacing: 2px; }
+.kroche-auth-form-wrap h1 { margin: 0 0 14px; color: #39271f; font-family: Georgia, serif; font-size: clamp(35px, 4vw, 49px); font-weight: 600; letter-spacing: -1.5px; line-height: 1.05; }
+.kroche-auth-lead { max-width: 390px; margin: 0 0 34px; color: #8b7a6d; font-size: 16px; line-height: 1.65; }
+.kroche-login-form { display: flex; flex-direction: column; gap: 20px; }
+.kroche-field { display: flex; flex-direction: column; }
+.kroche-label-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.kroche-label-row a { margin-bottom: 7px; color: #8c6244; font-size: 12px; font-weight: 700; text-decoration: none; }
+.kroche-label-row a:hover { text-decoration: underline; }
+.kroche-auth-form-wrap .form-label { display: block; margin: 0 0 8px; color: #5b4639; font-size: 13px; font-weight: 800; }
+.kroche-auth-form-wrap .form-control { width: 100%; box-sizing: border-box; margin: 0; padding: 15px 16px; border: 1px solid #dfd0c0; border-radius: 10px; background: #fff; color: #4e3629; font-size: 15px; transition: border-color .2s, box-shadow .2s; }
+.kroche-auth-form-wrap .form-control::placeholder { color: #b6a69a; }
+.kroche-auth-form-wrap .form-control:focus { border-color: #8b6245; box-shadow: 0 0 0 4px rgba(139,98,69,.10); outline: none; }
+.kroche-primary-button { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 5px; padding: 15px 18px; border: 0; border-radius: 10px; background: #6b4e3d; color: #fff; font-size: 14px; font-weight: 800; cursor: pointer; transition: background .2s, transform .2s; }
+.kroche-primary-button span { font-size: 20px; font-weight: 400; }
+.kroche-primary-button:hover { background: #4e3629; transform: translateY(-1px); }
+.kroche-auth-register { margin: 27px 0 0; color: #8b7a6d; font-size: 13px; line-height: 1.6; }
+.kroche-auth-register a { color: #6b4e3d; font-weight: 800; text-decoration: none; }
+.kroche-auth-register a:hover { text-decoration: underline; }
+.kroche-auth-footer { margin: 0; color: #b09e8e; font-size: 11px; letter-spacing: .2px; }
+
+.kroche-auth-visual { position: relative; display: flex; align-items: center; min-height: 100vh; overflow: hidden; padding: clamp(40px, 7vw, 110px); box-sizing: border-box; background: radial-gradient(circle at 80% 15%, rgba(207,160,100,.24), transparent 30%), linear-gradient(135deg, #50382b 0%, #34231d 52%, #201613 100%); color: #fff; }
+.kroche-visual-content { position: relative; z-index: 3; max-width: 610px; }
+.kroche-visual-badge { display: inline-block; margin-bottom: 26px; color: #e2bd80; font-size: 11px; font-weight: 800; letter-spacing: 2.2px; }
+.kroche-visual-content h2 { margin: 0 0 24px; color: #fffaf4; font-family: Georgia, serif; font-size: clamp(38px, 4.5vw, 68px); font-weight: 500; letter-spacing: -2px; line-height: 1.03; }
+.kroche-visual-content h2 em { color: #e1b978; font-style: normal; }
+.kroche-visual-content > p { max-width: 480px; margin: 0 0 42px; color: rgba(255,255,255,.70); font-size: 17px; line-height: 1.7; }
+.kroche-benefit-list { display: grid; gap: 18px; max-width: 460px; }
+.kroche-benefit { display: flex; align-items: flex-start; gap: 13px; }
+.kroche-benefit > span { display: grid; place-items: center; width: 23px; height: 23px; flex: 0 0 23px; border: 1px solid rgba(225,185,120,.45); border-radius: 50%; color: #e1b978; font-size: 12px; }
+.kroche-benefit strong { display: block; margin-bottom: 3px; color: #fffaf4; font-size: 14px; }
+.kroche-benefit small { display: block; color: rgba(255,255,255,.56); font-size: 12px; line-height: 1.5; }
+.kroche-visual-signature { position: absolute; right: clamp(24px, 5vw, 80px); bottom: 35px; color: rgba(255,255,255,.34); font-size: 10px; font-weight: 800; letter-spacing: 2px; }
+.kroche-visual-signature span { color: #d8ae70; margin: 0 6px; }
+.kroche-visual-orbit { position: absolute; border: 1px solid rgba(224,185,120,.18); border-radius: 50%; pointer-events: none; }
+.kroche-orbit-one { width: 680px; height: 680px; right: -330px; top: -190px; }
+.kroche-orbit-two { width: 440px; height: 440px; right: -210px; top: -70px; }
+.kroche-visual-thread { position: absolute; width: 420px; height: 420px; border: 1px solid rgba(224,185,120,.14); border-radius: 48% 52% 60% 40%; transform: rotate(35deg); pointer-events: none; }
+.kroche-thread-one { right: -100px; bottom: -230px; }
+.kroche-thread-two { right: 90px; bottom: -300px; transform: rotate(-25deg); }
+
+@media (max-width: 980px) {
+    .kroche-auth-shell { grid-template-columns: 1fr; }
+    .kroche-auth-visual { min-height: 390px; padding: 55px 30px; }
+    .kroche-visual-content h2 { font-size: 42px; letter-spacing: -1px; }
+    .kroche-visual-content > p { font-size: 15px; margin-bottom: 25px; }
+    .kroche-benefit-list { display: none; }
+    .kroche-auth-form-panel { min-height: 610px; padding: 28px 28px 24px; }
+    .kroche-auth-form-wrap { padding: 45px 0; }
+    .kroche-auth-footer { margin-top: auto; }
+    .kroche-visual-signature { display: none; }
+}
+
+@media (max-width: 520px) {
+    .kroche-auth-visual { min-height: 270px; padding: 35px 24px; }
+    .kroche-visual-content h2 { font-size: 33px; }
+    .kroche-visual-content > p { display: none; }
+    .kroche-auth-form-panel { padding: 24px 20px; }
+    .kroche-auth-brand { font-size: 20px; }
+    .kroche-auth-form-wrap { padding: 35px 0; }
+    .kroche-auth-form-wrap h1 { font-size: 35px; }
+    .kroche-auth-lead { font-size: 14px; }
+}
+
+/* Compatibilidade com telas antigas de autenticação */
+.auth-card { background: transparent; box-shadow: none; }
+.alerta { display: none; padding: 11px 13px; margin-bottom: 16px; border-radius: 8px; background: #fdecea; color: #a33a2b; font-size: 14px; }
+.alerta.sucesso { display: block; background: #eaf5e7; color: #3e6a38; }
+.alerta.info { display: block; background: #eee7df; color: #5e5047; }
+.alerta.erro { display: block; background: #fdecea; color: #a33a2b; }
