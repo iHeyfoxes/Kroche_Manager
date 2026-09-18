@@ -1,0 +1,25 @@
+/* ==========================================================
+   KROCHE MANAGER — CAMADA PREMIUM GLOBAL
+   Mantém a identidade marrom/creme e refina todas as telas.
+   ========================================================== */
+:root{--k-shadow:0 12px 35px rgba(78,54,41,.08);--k-radius:16px;--k-gold:#b88a55}
+body{font-family:"Inter","Segoe UI",system-ui,sans-serif;letter-spacing:-.01em}
+.sidebar{background:linear-gradient(180deg,#fffdf9 0%,#f8f0e7 100%);border-right:1px solid #eadbcb;padding:24px 16px}
+.brand{font-family:Georgia,serif;font-size:22px;letter-spacing:-.5px;padding:10px 12px 24px;color:#4e3629}.brand-icon{box-shadow:0 4px 12px rgba(107,78,61,.12)}
+.sidebar-tools{padding:0 4px 20px}.sidebar-tools .btn{border:1px solid #e3d2c1;box-shadow:none}
+.nav a{padding:12px 13px;border-radius:11px;margin:5px 0;color:#6a5548;transition:background .18s,transform .18s}.nav a:hover{background:#f0e1d1;transform:translateX(2px)}.nav a.active{background:#6b4e3d;color:#fff;box-shadow:0 5px 14px rgba(107,78,61,.18)}
+.main{padding:34px 42px;background:linear-gradient(135deg,#fbf7f2 0%,#f8f2eb 100%)}
+.top{margin-bottom:28px}.top h1{font-family:Georgia,serif;font-size:34px;letter-spacing:-1px;color:#3f2b21}.page-kicker,.panel-kicker{color:#a1774d;letter-spacing:2px}
+.card,.metric-card,.quick-card{border:1px solid #eadbcb;border-radius:var(--k-radius);box-shadow:var(--k-shadow);background:rgba(255,253,249,.94)}
+.card{padding:24px}.card h3{font-family:Georgia,serif;font-size:22px;color:#493327;margin-top:0}
+.input,.select,.textarea{border-color:#e2d2c2;border-radius:11px;background:#fffdfb;padding:13px 14px;transition:border-color .2s,box-shadow .2s}.input:focus,.select:focus,.textarea:focus{outline:none;border-color:#9b7251;box-shadow:0 0 0 4px rgba(155,114,81,.11)}
+.label{color:#6a5142;margin-bottom:8px}.btn{border-radius:11px;padding:11px 16px;transition:transform .18s,box-shadow .18s}.btn-primary{background:#6b4e3d;box-shadow:0 5px 13px rgba(107,78,61,.14)}.btn-primary:hover{background:#4e3629;transform:translateY(-1px);box-shadow:0 8px 18px rgba(107,78,61,.2)}.btn-secondary{background:#f0e5da;border:1px solid #e0cdbb}.btn-danger{background:#a94b40}
+.table{border-radius:12px;overflow:hidden}.table th{background:#f4e9dd;color:#6b5141;font-size:12px;letter-spacing:.3px;text-transform:uppercase}.table td{padding:14px 11px}.table tr:hover td{background:#fffaf5}
+.dashboard-hero{background:linear-gradient(115deg,#fffaf4,#f1e2d2);border-color:#e5d2bf;padding:34px}.dashboard-hero h2{font-size:34px;color:#4a3125}.metric-card{padding:22px}.metric-card strong{font-family:Georgia,serif;font-size:25px;color:#4e3629}.metric-card:hover{border-color:#b58b65}.metric-icon{background:#f0e1d1}
+.dashboard-panel{box-shadow:var(--k-shadow)}.quick-card{border-color:#e5d5c5}.quick-card:hover{border-color:#b58b65}
+.alert{border:1px solid transparent;border-radius:11px;box-shadow:none}.alert.ok{border-color:#c7dfc5}.alert.err{border-color:#efc7c2}
+/* Mantém o modo escuro sofisticado */
+.dark .sidebar{background:linear-gradient(180deg,#261d19,#1d1714);border-color:#423129}.dark .main{background:#171210}.dark .card,.dark .metric-card,.dark .quick-card{background:#251d1a;border-color:#49372e;box-shadow:0 12px 35px rgba(0,0,0,.16)}.dark .top h1,.dark .card h3,.dark .metric-card strong{color:#fff7ef}.dark .input,.dark .select,.dark .textarea{background:#382b26;border-color:#584338}.dark .table th{background:#382b26;color:#ead5c2}.dark .table tr:hover td{background:#30241f}.dark .dashboard-hero{background:linear-gradient(115deg,#2b211c,#38291f);border-color:#4b372b}.dark .nav a{color:#ddcbbd}.dark .nav a.active{background:#8a644a;color:#fff}
+@media(max-width:1100px){.main{padding:28px 24px}.quick-grid{grid-template-columns:repeat(2,1fr)}.dashboard-columns{grid-template-columns:1fr}}
+@media(max-width:800px){.main{padding:20px 14px}.top h1{font-size:28px}.dashboard-hero{padding:24px;align-items:flex-start;flex-direction:column}.dashboard-hero h2{font-size:28px}.card{padding:18px}}
+@media(max-width:430px){.quick-grid{grid-template-columns:1fr}.metric-card{padding:16px}.main{padding:16px 12px}}
