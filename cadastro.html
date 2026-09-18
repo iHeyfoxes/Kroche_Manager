@@ -9,48 +9,81 @@
 <link rel="stylesheet" href="assets/css/premium.css">
 <link rel="stylesheet" href="assets/css/professional.css">
 </head>
-<body>
-<div class="auth-wrapper">
-    <div class="auth-card">
+<body class="kroche-auth-page">
+<div class="kroche-auth-shell">
+    <section class="kroche-auth-form-panel">
         <div class="kroche-auth-brand"><span class="kroche-brand-mark">🧶</span><span>Kroche <b>Manager</b></span></div>
-        <span class="kroche-auth-kicker">COMECE SEU ATELIÊ DIGITAL</span>
-        <h1>Criar sua conta</h1>
-        <p class="subtitulo">Organize sua produção e cuide do seu negócio com mais tranquilidade.</p>
 
-        <div id="alerta" class="alerta" role="alert"></div>
+        <div class="kroche-auth-form-wrap">
+            <span class="kroche-auth-kicker">COMECE SEU ATELIÊ DIGITAL</span>
+            <h1>Criar sua conta</h1>
+            <p class="kroche-auth-lead">Organize sua produção e cuide do seu negócio com mais tranquilidade.</p>
 
-        <form id="form-cadastro">
-            <label class="form-label" for="nome">Seu nome</label>
-            <input type="text" id="nome" class="form-control" placeholder="Como podemos chamar você?" autocomplete="name" required autofocus>
+            <div id="alerta" class="alerta" role="alert"></div>
 
-            <label class="form-label" for="nicho">Qual é o seu nicho?</label>
-            <select id="nicho" class="form-control" required>
-                <option value="" disabled selected>Selecione seu tipo de artesanato</option>
-                <option value="Crochê e Amigurumi">Crochê e Amigurumi</option>
-                <option value="Costura e Confecção">Costura e Confecção</option>
-                <option value="Bordado">Bordado</option>
-                <option value="Papelaria e Personalizados">Papelaria e Personalizados</option>
-                <option value="Velas e Aromas">Velas e Aromas</option>
-                <option value="Confeitaria e Doces">Confeitaria e Doces</option>
-                <option value="Outro">Outro</option>
-            </select>
+            <form id="form-cadastro" class="kroche-login-form">
+                <div class="kroche-field">
+                    <label class="form-label" for="nome">Seu nome</label>
+                    <input type="text" id="nome" class="form-control" placeholder="Como podemos chamar você?" autocomplete="name" required autofocus>
+                </div>
 
-            <label class="form-label" for="email">E-mail</label>
-            <input type="email" id="email" class="form-control" placeholder="voce@exemplo.com" autocomplete="email" required>
+                <div class="kroche-field">
+                    <label class="form-label" for="nicho">Qual é o seu nicho?</label>
+                    <select id="nicho" class="form-control" required>
+                        <option value="" disabled selected>Selecione seu tipo de artesanato</option>
+                        <option value="Crochê e Amigurumi">Crochê e Amigurumi</option>
+                        <option value="Costura e Confecção">Costura e Confecção</option>
+                        <option value="Bordado">Bordado</option>
+                        <option value="Papelaria e Personalizados">Papelaria e Personalizados</option>
+                        <option value="Velas e Aromas">Velas e Aromas</option>
+                        <option value="Confeitaria e Doces">Confeitaria e Doces</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                </div>
 
-            <label class="form-label" for="senha">Senha</label>
-            <input type="password" id="senha" class="form-control" placeholder="Mínimo de 8 caracteres" autocomplete="new-password" required minlength="8">
+                <div class="kroche-field">
+                    <label class="form-label" for="email">E-mail</label>
+                    <input type="email" id="email" class="form-control" placeholder="voce@exemplo.com" autocomplete="email" required>
+                </div>
 
-            <label class="form-label" for="confirmar_senha">Confirmar senha</label>
-            <input type="password" id="confirmar_senha" class="form-control" placeholder="Repita sua senha" autocomplete="new-password" required minlength="8">
+                <div class="kroche-field">
+                    <label class="form-label" for="senha">Senha</label>
+                    <input type="password" id="senha" class="form-control" placeholder="Mínimo de 8 caracteres" autocomplete="new-password" required minlength="8">
+                </div>
 
-            <div class="form-check"><input type="checkbox" id="termos" required><label for="termos">Li e aceito os <a href="termos-de-uso.html" target="_blank">Termos de Uso</a></label></div>
-            <div class="form-check"><input type="checkbox" id="privacidade" required><label for="privacidade">Li e aceito a <a href="politica-de-privacidade.html" target="_blank">Política de Privacidade</a></label></div>
+                <div class="kroche-field">
+                    <label class="form-label" for="confirmar_senha">Confirmar senha</label>
+                    <input type="password" id="confirmar_senha" class="form-control" placeholder="Repita sua senha" autocomplete="new-password" required minlength="8">
+                </div>
 
-            <button type="submit" class="btn-marrom kroche-primary-button" id="btn-criar">Criar minha conta <span>→</span></button>
-        </form>
-        <div class="auth-links">Já tem conta? <a href="login.html">Entrar</a></div>
-    </div>
+                <div class="kroche-consents">
+                    <div class="form-check"><input type="checkbox" id="termos" required><label for="termos">Li e aceito os <a href="termos-de-uso.html" target="_blank">Termos de Uso</a></label></div>
+                    <div class="form-check"><input type="checkbox" id="privacidade" required><label for="privacidade">Li e aceito a <a href="politica-de-privacidade.html" target="_blank">Política de Privacidade</a></label></div>
+                </div>
+
+                <button type="submit" class="btn-marrom kroche-primary-button" id="btn-criar">Criar minha conta <span>→</span></button>
+            </form>
+            <div class="kroche-auth-register">Já tem conta? <a href="login.html">Entrar</a></div>
+        </div>
+    </section>
+
+    <section class="kroche-auth-visual">
+        <div class="kroche-visual-content">
+            <span class="kroche-visual-badge">SEU ATELIÊ, MAIS ORGANIZADO</span>
+            <h2>Transforme sua criatividade em um negócio <em>mais leve.</em></h2>
+            <p>Tenha seus produtos, vendas, encomendas e finanças em um só lugar — com a simplicidade que seu trabalho merece.</p>
+            <div class="kroche-benefit-list">
+                <div class="kroche-benefit"><span>✓</span><div><strong>Organização sem complicação</strong><small>Centralize as informações do seu ateliê.</small></div></div>
+                <div class="kroche-benefit"><span>✓</span><div><strong>Mais tempo para criar</strong><small>Reduza tarefas repetitivas do dia a dia.</small></div></div>
+                <div class="kroche-benefit"><span>✓</span><div><strong>Decisões com mais clareza</strong><small>Acompanhe suas vendas e resultados.</small></div></div>
+            </div>
+        </div>
+        <span class="kroche-visual-signature">FEITO PARA QUEM CRIA <span>✦</span> KROCHE MANAGER</span>
+        <span class="kroche-visual-orbit kroche-orbit-one"></span>
+        <span class="kroche-visual-orbit kroche-orbit-two"></span>
+        <span class="kroche-visual-thread kroche-thread-one"></span>
+        <span class="kroche-visual-thread kroche-thread-two"></span>
+    </section>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
