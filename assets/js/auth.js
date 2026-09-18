@@ -10,7 +10,6 @@ function mostrarAlerta(elId, tipo, mensagem) {
     el.textContent = mensagem;
     el.setAttribute("role", "alert");
 
-    // Remove alertas antigos para evitar timers acumulados.
     if (el._krocheAlertTimer) clearTimeout(el._krocheAlertTimer);
     el._krocheAlertTimer = setTimeout(() => {
         el.classList.add("oculto");
@@ -34,6 +33,18 @@ async function fazerLogin(email, senha) {
         return;
     }
     window.location.href = "dashboard.html";
+}
+
+async function fazerLoginGoogle() {
+    const redirectTo = `${window.location.origin}/dashboard.html`;
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo }
+    });
+
+    if (error) {
+        mostrarAlerta("alerta", "erro", textoErroSupabase(error));
+    }
 }
 
 async function fazerCadastro({ nome, nicho, email, senha, confirmarSenha, termos, privacidade }) {
@@ -123,8 +134,6 @@ async function exigirLogin() {
     return session.user;
 }
 
-// Carrega somente o arquivo de estilo existente, evitando uma requisição
-// desnecessária para premium.css, que não faz parte da estrutura atual.
 (function carregarEstiloKroche() {
     const href = "assets/css/professional.css";
     if (document.querySelector(`link[data-kroche-style="${href}"]`)) return;
