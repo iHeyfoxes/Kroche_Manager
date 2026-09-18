@@ -5,8 +5,16 @@
 function mostrarAlerta(elId, tipo, mensagem) {
     const el = document.getElementById(elId);
     if (!el) return;
+
     el.className = `alerta ${tipo}`;
     el.textContent = mensagem;
+    el.setAttribute("role", "alert");
+
+    // Remove alertas antigos para evitar timers acumulados.
+    if (el._krocheAlertTimer) clearTimeout(el._krocheAlertTimer);
+    el._krocheAlertTimer = setTimeout(() => {
+        el.classList.add("oculto");
+    }, tipo === "erro" ? 6000 : 4000);
 }
 
 function textoErroSupabase(error) {
