@@ -6,14 +6,20 @@
 const catalogoMoney = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const catalogoEsc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;' }[c]));
 const catalogoParams = new URLSearchParams(window.location.search);
-const catalogoSlug = catalogoParams.get('slug');
+const catalogoSlug = (catalogoParams.get('slug') || '').trim();
 let catalogoLoja = null;
 let catalogoProdutos = [];
 let catalogoCarrinho = [];
 
 function catalogoMsg(text, ok = true) {
-    const el = document.getElementById('catalogoMsg');
-    if (!el) return;
+    const root = document.getElementById('catalogoApp');
+    if (!root) return;
+    let el = document.getElementById('catalogoMsg');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'catalogoMsg';
+        root.prepend(el);
+    }
     el.className = `catalogo-msg ${ok ? 'ok' : 'erro'}`;
     el.textContent = text;
     el.hidden = false;
@@ -139,16 +145,19 @@ async function catalogoFinalizar(event) {
 async function catalogoInicializar() {
     const root = document.getElementById('catalogoApp');
     if (!root) return;
-    if (!catalogoSlug) return catalogoMsg('Link de loja inválido. Informe o parâmetro slug.', false);
 
-    // A RPC pública retorna somente os campos necessários ao catálogo.
-    // Isso evita expor colunas internas da tabela usuarios ao visitante.
+    if (!catalogoSlug || catalogoSlug === 'undefined' || catalogoSlug === 'null') {
+        root.innerHTML = '<div class="card"><h2>Link do catálogo inválido</h2><p>O link precisa conter o identificador da loja.</p></div>';
+        return;
+    }
+
     const { data, error } = await supabaseClient.rpc('obter_catalogo_publico', {
         p_slug: catalogoSlug
     });
 
     if (error || !data?.loja) {
-        return catalogoMsg(error?.message || 'Não foi possível encontrar esta loja.', false);
+        root.innerHTML = `<div class="card"><h2>Não foi possível carregar o catálogo</h2><p>${catalogoEsc(error?.message || 'Loja não encontrada.')}</p></div>`;
+        return;
     }
 
     catalogoLoja = data.loja;
