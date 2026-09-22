@@ -7,7 +7,10 @@
     let slugAtual = null;
 
     async function obterSlugAtual() {
-        if (!window.supabaseClient) return null;
+        // supabaseClient é declarado no escopo global pelo supabaseConfig.js.
+        // Não usar window.supabaseClient: uma variável global criada com const
+        // não fica disponível como propriedade de window.
+        if (typeof supabaseClient === 'undefined' || !supabaseClient) return null;
 
         const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
         if (authError || !user) return null;
