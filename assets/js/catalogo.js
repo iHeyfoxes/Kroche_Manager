@@ -1,168 +1,21 @@
-/* ============================================================
-   CATÁLOGO PÚBLICO — estoque, carrinho, encomendas e WhatsApp
-   URL: /loja/index.html?slug=nome-da-loja
-   ============================================================ */
-
-const catalogoMoney = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-const catalogoEsc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;' }[c]));
-const catalogoParams = new URLSearchParams(window.location.search);
+/* CATÁLOGO PÚBLICO — versão moderna e personalizável */
+const catalogoMoney = v => Number(v || 0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const catalogoEsc = v => String(v ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+const catalogoParams = new URLSearchParams(location.search);
 const catalogoSlug = (catalogoParams.get('slug') || '').trim();
-let catalogoLoja = null;
-let catalogoProdutos = [];
-let catalogoCarrinho = [];
-
-function catalogoMsg(text, ok = true) {
-    const root = document.getElementById('catalogoApp');
-    if (!root) return;
-    let el = document.getElementById('catalogoMsg');
-    if (!el) {
-        el = document.createElement('div');
-        el.id = 'catalogoMsg';
-        root.prepend(el);
-    }
-    el.className = `catalogo-msg ${ok ? 'ok' : 'erro'}`;
-    el.textContent = text;
-    el.hidden = false;
-}
-
-function catalogoRender() {
-    const root = document.getElementById('catalogoApp');
-    if (!root) return;
-
-    if (!catalogoLoja) {
-        root.innerHTML = '<div class="card"><h2>Loja não encontrada</h2><p>Confira o link do catálogo.</p></div>';
-        return;
-    }
-
-    const produtos = catalogoProdutos.filter(p => p.mostrar_catalogo);
-    const cor = catalogoLoja.catalogo_cor || '#6B4E3D';
-    const botao = catalogoLoja.catalogo_cor_botao || '#25D366';
-    document.documentElement.style.setProperty('--catalogo-cor', cor);
-    document.documentElement.style.setProperty('--catalogo-botao', botao);
-
-    root.innerHTML = `
-      <header class="catalogo-header">
-        ${catalogoLoja.catalogo_banner ? `<img class="catalogo-banner" src="${catalogoEsc(catalogoLoja.catalogo_banner)}" alt="Banner da loja">` : ''}
-        <h1>${catalogoEsc(catalogoLoja.catalogo_nome || catalogoLoja.nome || 'Minha Loja')}</h1>
-        <p>${catalogoEsc(catalogoLoja.catalogo_slogan || '')}</p>
-      </header>
-      <div class="catalogo-toolbar"><span>${produtos.length} produto(s)</span><button id="abrirCarrinho" class="catalogo-btn">🛒 Carrinho (<span id="contadorCarrinho">0</span>)</button></div>
-      <div id="catalogoMsg" class="catalogo-msg" hidden></div>
-      <section class="catalogo-grid">
-        ${produtos.map(p => {
-            const qtd = Number(p.quantidade || 0);
-            const indisponivel = qtd <= 0;
-            return `<article class="catalogo-produto">
-              ${p.foto ? `<img src="${catalogoEsc(p.foto)}" alt="${catalogoEsc(p.nome)}">` : '<div class="catalogo-sem-foto">🧶</div>'}
-              <div class="catalogo-produto-corpo">
-                <h3>${catalogoEsc(p.nome)}</h3>
-                <p>${catalogoEsc(p.descricao || '')}</p>
-                ${catalogoLoja.mostrar_preco !== false ? `<strong>${catalogoMoney(p.preco)}</strong>` : ''}
-                ${catalogoLoja.mostrar_estoque !== false ? `<small class="estoque ${indisponivel ? 'esgotado' : ''}">${indisponivel ? 'Esgotado' : `${qtd} disponível(is)`}</small>` : ''}
-                <div class="catalogo-comprar">${indisponivel ? '<button class="catalogo-btn" disabled>Sem estoque</button>' : `<input type="number" min="1" max="${qtd}" value="1" id="qtd-${p.id}"><button class="catalogo-btn" data-add="${p.id}">Adicionar</button>`}</div>
-              </div>
-            </article>`;
-        }).join('') || '<p>Nenhum produto disponível no momento.</p>'}
-      </section>
-      <section id="catalogoCheckout" class="catalogo-checkout" hidden></section>`;
-
-    document.getElementById('abrirCarrinho').onclick = catalogoMostrarCheckout;
-    root.querySelectorAll('[data-add]').forEach(btn => btn.onclick = () => {
-        const id = Number(btn.dataset.add);
-        const produto = catalogoProdutos.find(p => Number(p.id) === id);
-        const qtdEl = document.getElementById(`qtd-${id}`);
-        const quantidade = Math.max(1, Number(qtdEl?.value || 1));
-        if (!produto || quantidade > Number(produto.quantidade || 0)) return catalogoMsg('Quantidade maior que o estoque disponível.', false);
-        const existente = catalogoCarrinho.find(i => i.id === id);
-        if (existente) existente.quantidade = Math.min(Number(produto.quantidade), existente.quantidade + quantidade);
-        else catalogoCarrinho.push({ id, quantidade });
-        catalogoAtualizarContador();
-        catalogoMsg('Produto adicionado ao carrinho.');
-    });
-}
-
-function catalogoAtualizarContador() {
-    const total = catalogoCarrinho.reduce((s, i) => s + i.quantidade, 0);
-    const el = document.getElementById('contadorCarrinho');
-    if (el) el.textContent = total;
-}
-
-function catalogoMostrarCheckout() {
-    const el = document.getElementById('catalogoCheckout');
-    if (!el) return;
-    if (!catalogoCarrinho.length) {
-        el.hidden = false;
-        el.innerHTML = '<h2>Seu carrinho está vazio</h2>';
-        return;
-    }
-    const linhas = catalogoCarrinho.map(item => {
-        const p = catalogoProdutos.find(x => Number(x.id) === item.id);
-        return p ? `<li>${catalogoEsc(p.nome)} — ${item.quantidade} × ${catalogoMoney(p.preco)}</li>` : '';
-    }).join('');
-    el.hidden = false;
-    el.innerHTML = `<h2>Finalizar pedido</h2><ul>${linhas}</ul><form id="catalogoForm">
-      <label>Seu nome<input name="cliente" required maxlength="120"></label>
-      <label>Seu WhatsApp<input name="telefone" required maxlength="30" placeholder="(00) 00000-0000"></label>
-      <button class="catalogo-btn" type="submit">Confirmar pedido e enviar no WhatsApp</button>
-      <p class="catalogo-aviso">O pedido será registrado como <b>Pendente</b>, o estoque será abatido e você será direcionado ao WhatsApp da loja.</p>
-    </form>`;
-    document.getElementById('catalogoForm').onsubmit = catalogoFinalizar;
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-async function catalogoFinalizar(event) {
-    event.preventDefault();
-    const form = new FormData(event.target);
-    const cliente = String(form.get('cliente') || '').trim();
-    const telefone = String(form.get('telefone') || '').trim();
-    const btn = event.target.querySelector('button[type="submit"]');
-    btn.disabled = true;
-    btn.textContent = 'Processando...';
-
-    const { data, error } = await supabaseClient.rpc('finalizar_pedido_catalogo', {
-        p_slug: catalogoSlug,
-        p_cliente: cliente,
-        p_telefone: telefone,
-        p_itens: catalogoCarrinho
-    });
-
-    if (error || !data?.sucesso) {
-        btn.disabled = false;
-        btn.textContent = 'Confirmar pedido e enviar no WhatsApp';
-        catalogoMsg(error?.message || 'Não foi possível concluir o pedido. Atualize a página e tente novamente.', false);
-        return;
-    }
-
-    const linhas = (data.itens || []).map(i => `- ${i.nome} (${i.quantidade} un.)`).join('\n');
-    const texto = `Olá! Quero confirmar um pedido na sua loja.\n\nCliente: ${cliente}\nWhatsApp: ${telefone}\n\n${linhas}\n\nTotal: ${catalogoMoney(data.total)}\nStatus: Pendente`;
-    const numero = String(data.whatsapp || '').replace(/\D/g, '');
-    catalogoCarrinho = [];
-    catalogoMsg('Pedido registrado! Abrindo o WhatsApp da loja...');
-    if (numero) window.location.href = `https://wa.me/${numero}?text=${encodeURIComponent(texto)}`;
-    else catalogoMsg('Pedido registrado, mas a loja ainda não cadastrou um número de WhatsApp.', false);
-}
-
-async function catalogoInicializar() {
-    const root = document.getElementById('catalogoApp');
-    if (!root) return;
-
-    if (!catalogoSlug || catalogoSlug === 'undefined' || catalogoSlug === 'null') {
-        root.innerHTML = '<div class="card"><h2>Link do catálogo inválido</h2><p>O link precisa conter o identificador da loja.</p></div>';
-        return;
-    }
-
-    const { data, error } = await supabaseClient.rpc('obter_catalogo_publico', {
-        p_slug: catalogoSlug
-    });
-
-    if (error || !data?.loja) {
-        root.innerHTML = `<div class="card"><h2>Não foi possível carregar o catálogo</h2><p>${catalogoEsc(error?.message || 'Loja não encontrada.')}</p></div>`;
-        return;
-    }
-
-    catalogoLoja = data.loja;
-    catalogoProdutos = data.produtos || [];
-    catalogoRender();
-}
-
-document.addEventListener('DOMContentLoaded', catalogoInicializar);
+let catalogoLoja = null, catalogoProdutos = [], catalogoCarrinho = [], catalogoBusca = '', catalogoCategoria = 'Todos', catalogoOrdenacao = 'recentes';
+function catalogoMsg(text, ok=true){const root=document.getElementById('catalogoApp');if(!root)return;let el=document.getElementById('catalogoMsg');if(!el){el=document.createElement('div');el.id='catalogoMsg';root.prepend(el)}el.className=`catalogo-msg ${ok?'ok':'erro'}`;el.textContent=text;el.hidden=false;setTimeout(()=>{if(el)el.hidden=true},3500)}
+function catalogoTema(){const cor=catalogoLoja?.catalogo_cor||'#b86df2',botao=catalogoLoja?.catalogo_cor_botao||cor;document.documentElement.style.setProperty('--catalogo-cor',cor);document.documentElement.style.setProperty('--catalogo-botao',botao)}
+function catalogoCategorias(){const valores=catalogoProdutos.map(p=>p.categoria||p.categoria_nome||p.tipo||'').map(v=>String(v).trim()).filter(Boolean);return ['Todos',...Array.from(new Set(valores))]}
+function catalogoFiltrar(){let lista=catalogoProdutos.filter(p=>p.mostrar_catalogo);const termo=catalogoBusca.toLowerCase();if(termo)lista=lista.filter(p=>`${p.nome||''} ${p.descricao||''} ${p.categoria||p.categoria_nome||''}`.toLowerCase().includes(termo));if(catalogoCategoria!=='Todos')lista=lista.filter(p=>String(p.categoria||p.categoria_nome||p.tipo||'')===catalogoCategoria);if(catalogoOrdenacao==='menor')lista.sort((a,b)=>Number(a.preco||0)-Number(b.preco||0));if(catalogoOrdenacao==='maior')lista.sort((a,b)=>Number(b.preco||0)-Number(a.preco||0));if(catalogoOrdenacao==='nome')lista.sort((a,b)=>String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR'));return lista}
+function catalogoFavoritos(){try{return JSON.parse(localStorage.getItem(`kroche_fav_${catalogoSlug}`)||'[]')}catch{return[]}}
+function catalogoSetFavoritos(v){try{localStorage.setItem(`kroche_fav_${catalogoSlug}`,JSON.stringify(v))}catch{}}
+function catalogoRender(){const root=document.getElementById('catalogoApp');if(!root)return;if(!catalogoLoja){root.innerHTML='<div class="catalogo-empty"><h2>Loja não encontrada</h2><p>Confira o link do catálogo.</p></div>';return}catalogoTema();const nome=catalogoLoja.catalogo_nome||catalogoLoja.nome||'Minha Loja',slogan=catalogoLoja.catalogo_slogan||'Peças feitas à mão, com carinho.',banner=catalogoLoja.catalogo_banner||'',lista=catalogoFiltrar(),cats=catalogoCategorias(),favs=catalogoFavoritos();root.innerHTML=`<div class="catalogo-topbar"><div class="catalogo-brand"><div class="catalogo-brand-mark">🧶</div><div class="catalogo-brand-copy"><strong>${catalogoEsc(nome)}</strong><span>Seu talento, mais organizado</span></div></div><nav class="catalogo-nav"><a class="active" href="#produtos">Catálogo</a><a href="#sobre">Sobre</a><a href="#contato">Contato</a><button class="catalogo-icon-btn" id="favoritosBtn" title="Favoritos">♡<span class="catalogo-badge" id="favCount">${favs.length}</span></button><button class="catalogo-icon-btn" id="abrirCarrinho" title="Carrinho">🛒<span class="catalogo-badge" id="contadorCarrinho">0</span></button></nav></div><header class="catalogo-hero" id="sobre">${banner?`<img class="catalogo-hero-bg" src="${catalogoEsc(banner)}" alt="">`:''}<div class="catalogo-hero-overlay"></div><div class="catalogo-hero-content"><span class="catalogo-eyebrow">Catálogo online</span><h1>${catalogoEsc(nome)}</h1><p>${catalogoEsc(slogan)}</p><div class="catalogo-features"><span class="catalogo-feature"><b>✦</b> Feito à mão</span><span class="catalogo-feature"><b>✓</b> Compra segura</span><span class="catalogo-feature"><b>♡</b> Feito com carinho</span></div></div></header><div class="catalogo-tools"><label class="catalogo-search"><span>⌕</span><input id="catalogoBusca" type="search" placeholder="Buscar no catálogo..." value="${catalogoEsc(catalogoBusca)}"></label><select id="catalogoOrdenacao" class="catalogo-select"><option value="recentes" ${catalogoOrdenacao==='recentes'?'selected':''}>Mais recentes</option><option value="menor" ${catalogoOrdenacao==='menor'?'selected':''}>Menor preço</option><option value="maior" ${catalogoOrdenacao==='maior'?'selected':''}>Maior preço</option><option value="nome" ${catalogoOrdenacao==='nome'?'selected':''}>Nome A–Z</option></select></div><div class="catalogo-categorias" id="catalogoCategorias">${cats.map(c=>`<button class="catalogo-chip ${c===catalogoCategoria?'active':''}" data-cat="${catalogoEsc(c)}">${catalogoEsc(c)}</button>`).join('')}</div><div class="catalogo-section-head" id="produtos"><div><h2>Produtos</h2><span>Escolha sua peça favorita</span></div><span>${lista.length} item(ns)</span></div><div class="catalogo-grid">${lista.map(catalogoCard).join('')||'<div class="catalogo-empty"><h3>Nenhum produto encontrado</h3><p>Tente outra busca ou categoria.</p></div>'}</div><div id="catalogoMsg" class="catalogo-msg" hidden></div><section id="catalogoCheckout" class="catalogo-checkout" hidden></section><section class="catalogo-trust"><div class="catalogo-trust-item"><span>♢</span><div><b>Compra segura</b><small>Seus dados protegidos</small></div></div><div class="catalogo-trust-item"><span>⌁</span><div><b>Entrega rápida</b><small>Combine com a loja</small></div></div><div class="catalogo-trust-item"><span>♡</span><div><b>Feito à mão</b><small>Com muito carinho</small></div></div><div class="catalogo-trust-item" id="contato"><span>⌕</span><div><b>Suporte</b><small>Fale com a loja</small></div></div></section><footer class="catalogo-footer"><span>${catalogoEsc(nome)} · <strong>Catálogo de Produtos</strong></span><span>Obrigada por apoiar o artesanato! ♡</span></footer>`;document.getElementById('catalogoBusca').oninput=e=>{catalogoBusca=e.target.value;catalogoRender()};document.getElementById('catalogoOrdenacao').onchange=e=>{catalogoOrdenacao=e.target.value;catalogoRender()};root.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{catalogoCategoria=b.dataset.cat;catalogoRender()});root.querySelectorAll('[data-fav]').forEach(b=>b.onclick=()=>catalogoAlternarFavorito(Number(b.dataset.fav)));root.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>catalogoAdicionar(Number(b.dataset.add)));document.getElementById('abrirCarrinho').onclick=catalogoMostrarCheckout;document.getElementById('favoritosBtn').onclick=()=>{const favs=catalogoFavoritos(),lista=favs.map(id=>catalogoProdutos.find(p=>Number(p.id)===id)).filter(Boolean);root.querySelector('.catalogo-grid').innerHTML=lista.map(catalogoCard).join('')||'<div class="catalogo-empty"><h3>Você ainda não favoritou produtos.</h3><p>Clique no ♡ dos produtos que gostar.</p></div>';root.querySelectorAll('[data-fav]').forEach(b=>b.onclick=()=>catalogoAlternarFavorito(Number(b.dataset.fav)));root.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>catalogoAdicionar(Number(b.dataset.add)))} }
+function catalogoCard(p){const qtd=Number(p.quantidade||0),indisponivel=qtd<=0,fav=catalogoFavoritos().includes(Number(p.id)),categoria=p.categoria||p.categoria_nome||p.tipo||'Artesanato';return `<article class="catalogo-produto"><div class="catalogo-produto-media">${p.foto?`<img src="${catalogoEsc(p.foto)}" alt="${catalogoEsc(p.nome)}" loading="lazy">`:'<div class="catalogo-sem-foto">🧶</div>'}<button class="catalogo-fav ${fav?'active':''}" data-fav="${p.id}" title="Favoritar">${fav?'♥':'♡'}</button></div><div class="catalogo-produto-corpo"><span class="catalogo-tag">${catalogoEsc(categoria)}</span><h3>${catalogoEsc(p.nome)}</h3><p>${catalogoEsc(p.descricao||'Peça artesanal feita com cuidado.')}</p>${catalogoLoja.mostrar_preco!==false?`<strong class="catalogo-preco">${catalogoMoney(p.preco)}</strong>`:''}${catalogoLoja.mostrar_estoque!==false?`<small class="catalogo-estoque ${indisponivel?'esgotado':''}">${indisponivel?'Esgotado':`${qtd} disponível(is)`}</small>`:''}<div class="catalogo-comprar">${indisponivel?'<button class="catalogo-btn" disabled>Sem estoque</button>':`<input type="number" min="1" max="${qtd}" value="1" id="qtd-${p.id}"><button class="catalogo-btn" data-add="${p.id}">Adicionar</button>`}</div></div></article>`}
+function catalogoAlternarFavorito(id){const favs=catalogoFavoritos(),i=favs.indexOf(id);if(i>=0)favs.splice(i,1);else favs.push(id);catalogoSetFavoritos(favs);catalogoRender()}
+function catalogoAdicionar(id){const produto=catalogoProdutos.find(p=>Number(p.id)===id),qtdEl=document.getElementById(`qtd-${id}`),quantidade=Math.max(1,Number(qtdEl?.value||1));if(!produto||quantidade>Number(produto.quantidade||0))return catalogoMsg('Quantidade maior que o estoque disponível.',false);const existente=catalogoCarrinho.find(i=>i.id===id);if(existente)existente.quantidade=Math.min(Number(produto.quantidade),existente.quantidade+quantidade);else catalogoCarrinho.push({id,quantidade});catalogoAtualizarContador();catalogoMsg('Produto adicionado ao carrinho.')}
+function catalogoAtualizarContador(){const el=document.getElementById('contadorCarrinho');if(el)el.textContent=catalogoCarrinho.reduce((s,i)=>s+i.quantidade,0)}
+function catalogoMostrarCheckout(){const el=document.getElementById('catalogoCheckout');if(!el)return;if(!catalogoCarrinho.length){el.hidden=false;el.innerHTML='<h2>Seu carrinho está vazio</h2>';return}const linhas=catalogoCarrinho.map(item=>{const p=catalogoProdutos.find(x=>Number(x.id)===item.id);return p?`<li>${catalogoEsc(p.nome)} — ${item.quantidade} × ${catalogoMoney(p.preco)}</li>`:''}).join('');el.hidden=false;el.innerHTML=`<h2>Finalizar pedido</h2><ul>${linhas}</ul><form id="catalogoForm"><label>Seu nome<input name="cliente" required maxlength="120"></label><label>Seu WhatsApp<input name="telefone" required maxlength="30" placeholder="(00) 00000-0000"></label><button class="catalogo-btn" type="submit">Confirmar pedido e enviar no WhatsApp</button><p class="catalogo-aviso">O pedido será registrado como <b>Pendente</b>, o estoque será abatido e você será direcionado ao WhatsApp da loja.</p></form>`;document.getElementById('catalogoForm').onsubmit=catalogoFinalizar;el.scrollIntoView({behavior:'smooth',block:'start'})}
+async function catalogoFinalizar(event){event.preventDefault();const form=new FormData(event.target),cliente=String(form.get('cliente')||'').trim(),telefone=String(form.get('telefone')||'').trim(),btn=event.target.querySelector('button[type="submit"]');btn.disabled=true;btn.textContent='Processando...';const {data,error}=await supabaseClient.rpc('finalizar_pedido_catalogo',{p_slug:catalogoSlug,p_cliente:cliente,p_telefone:telefone,p_itens:catalogoCarrinho});if(error||!data?.sucesso){btn.disabled=false;btn.textContent='Confirmar pedido e enviar no WhatsApp';catalogoMsg(error?.message||'Não foi possível concluir o pedido. Atualize a página e tente novamente.',false);return}const linhas=(data.itens||[]).map(i=>`- ${i.nome} (${i.quantidade} un.)`).join('\n'),texto=`Olá! Quero confirmar um pedido na sua loja.\n\nCliente: ${cliente}\nWhatsApp: ${telefone}\n\n${linhas}\n\nTotal: ${catalogoMoney(data.total)}\nStatus: Pendente`,numero=String(data.whatsapp||'').replace(/\D/g,'');catalogoCarrinho=[];catalogoMsg('Pedido registrado! Abrindo o WhatsApp da loja...');if(numero)location.href=`https://wa.me/${numero}?text=${encodeURIComponent(texto)}`;else catalogoMsg('Pedido registrado, mas a loja ainda não cadastrou um número de WhatsApp.',false)}
+async function catalogoInicializar(){const root=document.getElementById('catalogoApp');if(!root)return;if(!catalogoSlug||catalogoSlug==='undefined'||catalogoSlug==='null'){root.innerHTML='<div class="catalogo-empty"><h2>Link do catálogo inválido</h2><p>O link precisa conter o identificador da loja.</p></div>';return}const {data,error}=await supabaseClient.rpc('obter_catalogo_publico',{p_slug:catalogoSlug});if(error||!data?.loja){root.innerHTML=`<div class="catalogo-empty"><h2>Não foi possível carregar o catálogo</h2><p>${catalogoEsc(error?.message||'Loja não encontrada.')}</p></div>`;return}catalogoLoja=data.loja;catalogoProdutos=data.produtos||[];catalogoRender()}
+document.addEventListener('DOMContentLoaded',catalogoInicializar);
