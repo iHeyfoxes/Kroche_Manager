@@ -12,7 +12,7 @@ create or replace function public.finalizar_pedido_catalogo(
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = pg_catalog, public
 as $$
 declare
     v_loja public.usuarios%rowtype;
@@ -21,7 +21,6 @@ declare
     v_qtd integer;
     v_total numeric := 0;
     v_pedido_id bigint;
-    v_telefone_loja text;
     v_itens_confirmados jsonb := '[]'::jsonb;
 begin
     if coalesce(trim(p_cliente), '') = '' then
@@ -45,7 +44,6 @@ begin
         raise exception 'Loja não encontrada.';
     end if;
 
-    -- FOR UPDATE evita que dois clientes comprem o último item ao mesmo tempo.
     for v_item in select * from jsonb_array_elements(p_itens) loop
         v_qtd := greatest(0, coalesce((v_item->>'quantidade')::integer, 0));
 
@@ -100,4 +98,8 @@ begin
 end;
 $$;
 
-grant execute on function public.finalizar_pedido_catalogo(text, text, text, jsonb) to anon, authenticated;
+-- O checkout é público porque visitantes sem login precisam finalizar
+-- pedidos. Usuários autenticados não precisam de uma segunda permissão.
+revoke all on function public.finalizar_pedido_catalogo(text, text, text, jsonb) from public;
+revoke execute on function public.finalizar_pedido_catalogo(text, text, text, jsonb) from authenticated;
+grant execute on function public.finalizar_pedido_catalogo(text, text, text, jsonb) to anon;

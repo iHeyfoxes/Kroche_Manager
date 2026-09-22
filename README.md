@@ -1,50 +1,79 @@
-# Kroche Manager — versão Supabase + GitHub Pages
+# Kroche Manager
 
-## O que já está pronto (Etapa 1: Autenticação)
+Sistema de gestão para artesãs, com autenticação Supabase, gestão de clientes, produtos, materiais/estoque, encomendas, vendas, receitas e catálogo público.
 
-- `supabase/schema.sql` — schema completo do banco (todas as 7 tabelas do
-  `models.py` original), com Row Level Security e os 3 bugs de dados corrigidos:
-  1. slug duplicado no cadastro → gerado automaticamente e sempre único
-  2. campo errado (`whatsapp` em vez de `telefone`) na edição de encomenda → nem existe mais, só a coluna certa
-  3. fotos sobrescrevendo umas às outras → resolvido no upload (nome sempre com uuid)
-- Login, cadastro, esqueci senha, redefinir senha e logout, usando o
-  Supabase Auth nativo (sem reimplementar hash de senha nem envio de e-mail).
-- Painel (`dashboard.html`) ainda é só um placeholder que confirma que o
-  login funcionou — os módulos de verdade vêm nas próximas etapas, como combinado.
+## Estado atual
 
-## Como colocar pra rodar
+A base do projeto já está integrada ao Supabase e o fluxo de autenticação inclui:
 
-### 1. Criar o projeto no Supabase
-1. Crie uma conta em https://supabase.com e um novo projeto (grátis).
-2. Vá em **SQL Editor**, cole o conteúdo de `supabase/schema.sql` e rode.
-3. Vá em **Project Settings > API** e copie a **Project URL** e a **anon public key**.
+- Cadastro e login com Supabase Auth
+- Login com Google
+- Recuperação e redefinição de senha
+- Logout
+- Perfil/loja vinculado ao usuário autenticado
+- Row Level Security (RLS) para separar os dados de cada loja
+- Catálogo público de produtos
+- Estrutura para leads vindos do catálogo
+- Storage para fotos de perfil, produtos e banners
 
-### 2. Configurar o site
-Abra `assets/js/supabaseConfig.js` e cole os dois valores:
-```js
-const SUPABASE_URL = "https://xxxxx.supabase.co";
-const SUPABASE_ANON_KEY = "eyJ...";
-```
+O banco também recebeu ajustes de segurança e desempenho, incluindo políticas RLS mais eficientes, permissões mais restritas para operações autenticadas e índices para chaves estrangeiras.
 
-### 3. Testar localmente
-Como é tudo estático, dá pra abrir com qualquer servidor simples, por exemplo:
-```
+## Estrutura principal
+
+- `supabase/schema.sql` — estrutura inicial do banco e políticas RLS
+- `assets/js/` — lógica JavaScript do sistema e integração com Supabase
+- páginas HTML — interface do sistema
+
+## Supabase
+
+O projeto usa o Supabase para:
+
+- autenticação;
+- banco PostgreSQL;
+- Row Level Security;
+- armazenamento de imagens;
+- operações do catálogo público.
+
+A chave pública do Supabase deve ser configurada no arquivo de configuração do frontend. **Nunca coloque chaves secretas, service role keys ou credenciais privadas no repositório.**
+
+## Desenvolvimento local
+
+Como o frontend é estático, pode ser executado com um servidor local simples:
+
+```bash
 python -m http.server 8000
 ```
-e acessar `http://localhost:8000/login.html`.
 
-### 4. Publicar no GitHub Pages
-1. Suba esta pasta inteira para um repositório no GitHub.
-2. Em **Settings > Pages**, selecione a branch principal e a raiz (`/`) como origem.
-3. Depois, em **Settings > Pages**, configure seu domínio próprio (campo "Custom domain").
+Depois, abra:
 
-## O que falta (próximas etapas, como combinamos)
+```text
+http://localhost:8000/
+```
 
-- Cadastro de produtos + receitas (com upload de imagem pro Storage)
-- Vendas, compras e encomendas (CRUD completo)
-- Relatórios
-- Catálogo público + carrinho (`/loja/<slug>`) — no GitHub Pages isso vira algo
-  como `loja/index.html?slug=ateliedamaria`, porque Pages não tem rotas dinâmicas
-  de verdade; o JS lê o `slug` da URL e busca os dados no Supabase.
+## Publicação
 
-Me chama pra seguir com a próxima parte quando quiser.
+O projeto pode ser publicado em hospedagem estática, como GitHub Pages, desde que as configurações do Supabase e as URLs de redirecionamento do Auth estejam configuradas corretamente.
+
+## Próximas etapas
+
+Antes de considerar o sistema como versão final, ainda precisamos concluir e validar:
+
+- testes completos de todos os CRUDs;
+- validação de login Google e recuperação de senha em produção;
+- revisão do catálogo e finalização do fluxo de pedido;
+- testes de upload e exclusão de imagens;
+- revisão de responsividade;
+- relatórios e indicadores, caso ainda existam telas incompletas;
+- revisão final das políticas e permissões do Supabase;
+- habilitação da proteção contra senhas vazadas no Supabase Auth;
+- testes finais de produção e documentação.
+
+## Segurança
+
+O frontend utiliza apenas credenciais públicas apropriadas para aplicações cliente. Operações administrativas e dados privados devem continuar protegidos por RLS e nunca devem depender de segredos expostos no navegador.
+
+## Projeto
+
+Repositório: `iHeyfoxes/Kroche_Manager`
+
+O projeto está sendo desenvolvido de forma incremental, priorizando segurança, funcionamento real dos fluxos e manutenção simples do código.
