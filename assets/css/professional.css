@@ -41,40 +41,53 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .quick-card{border-radius:15px}
 .pill{font-weight:750;border:1px solid #e6d6c5}
 .empty{color:var(--k-pro-muted)}
-/* catálogo */
 .catalog{max-width:1360px}
 .catalog-hero,.catalog-hero-pro{box-shadow:0 18px 42px rgba(78,54,41,.12)}
 .product-card{border-radius:17px;border-color:var(--k-pro-border);box-shadow:0 7px 22px rgba(78,54,41,.06)}
 .product-card:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(78,54,41,.12);border-color:#c7a17f}
 .product-card .add-cart{border-radius:11px}
 .cart-fab{box-shadow:0 12px 30px rgba(78,54,41,.22)}
-/* modo escuro */
 html[data-theme="escuro"] body,body.dark{--k-pro-bg:#171210;--k-pro-surface:#251d1a;--k-pro-border:#49372e;--k-pro-text:#fff7ef;--k-pro-muted:#b9aaa0;--k-pro-soft:#382b26;background:var(--k-pro-bg);color:var(--k-pro-text)}
 html[data-theme="escuro"] .main,body.dark .main{background:radial-gradient(circle at 100% 0%,rgba(93,64,45,.18),transparent 32%),var(--k-pro-bg)}
 html[data-theme="escuro"] .card,html[data-theme="escuro"] .metric-card,html[data-theme="escuro"] .quick-card,body.dark .card,body.dark .metric-card,body.dark .quick-card{background:var(--k-pro-surface);border-color:var(--k-pro-border)}
 html[data-theme="escuro"] .top,body.dark .top{border-color:var(--k-pro-border)}
 html[data-theme="escuro"] .input,html[data-theme="escuro"] .select,html[data-theme="escuro"] .textarea,body.dark .input,body.dark .select,body.dark .textarea{background:#382b26;color:#fff7ef;border-color:#584338}
 html[data-theme="escuro"] .table-wrap,body.dark .table-wrap{background:var(--k-pro-surface);border-color:var(--k-pro-border)}
-/* mobile */
-@media(max-width:800px){
-  .top{padding-bottom:14px}
-  .dashboard-hero{gap:18px}
-  .dashboard-hero .hero-action{width:100%;justify-content:center}
-  .finance-total{align-items:stretch;flex-direction:column;gap:14px}
-  .mini-stat{text-align:left}
-  .dashboard-columns{gap:14px}
-  .table-wrap{border-radius:12px}
-  .catalog-hero-pro{height:280px;padding:24px}
-  .catalog-identity h1{font-size:34px}
-}
-@media(max-width:480px){
-  .top{gap:8px}
-  .top h1{font-size:25px}
-  .dashboard-hero h2{font-size:25px}
-  .metric-card{padding:15px}
-  .metric-card strong{font-size:20px}
-  .quick-card{padding:13px}
-  .catalog-identity h1{font-size:29px}
-  .catalog-hero-pro{height:250px}
-}
+@media(max-width:800px){.top{padding-bottom:14px}.dashboard-hero{gap:18px}.dashboard-hero .hero-action{width:100%;justify-content:center}.finance-total{align-items:stretch;flex-direction:column;gap:14px}.mini-stat{text-align:left}.dashboard-columns{gap:14px}.table-wrap{border-radius:12px}.catalog-hero-pro{height:280px;padding:24px}.catalog-identity h1{font-size:34px}}
+@media(max-width:480px){.top{gap:8px}.top h1{font-size:25px}.dashboard-hero h2{font-size:25px}.metric-card{padding:15px}.metric-card strong{font-size:20px}.quick-card{padding:13px}.catalog-identity h1{font-size:29px}.catalog-hero-pro{height:250px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* ===== KROCHE MANAGER 2.0 — refinamento visual global do painel ===== */
+.main{position:relative;isolation:isolate}
+.main:before{content:"";position:absolute;inset:0 0 auto;height:180px;pointer-events:none;background:linear-gradient(180deg,rgba(107,78,61,.035),transparent);z-index:-1}
+.top{min-height:66px;align-items:center}
+.top>div:first-child{min-width:0}
+.top h1{font-size:30px;margin-top:4px}
+.page-kicker{font-size:10px;letter-spacing:2px;font-weight:850;color:#9a7151}
+.nav{padding-top:4px}
+.nav a{display:flex;align-items:center;gap:9px;min-height:43px;font-weight:600}
+.nav a.active{font-weight:800}
+.sidebar-tools{margin-bottom:4px}
+.sidebar-tools .btn{box-shadow:none}
+.card{padding:22px}
+.card>h3{margin-top:0;margin-bottom:16px;font-size:20px}
+.grid{gap:16px}
+.actions{align-items:center}
+.btn{letter-spacing:-.1px}
+.btn-danger{box-shadow:0 5px 14px rgba(179,38,30,.10)}
+.table-wrap{overflow:hidden}
+.table-wrap .table{min-width:620px}
+.table th{font-weight:800;text-transform:uppercase}
+.table td,.table th{padding:13px 14px}
+.table tbody tr{transition:background .15s ease}
+.table tbody tr:hover{background:rgba(243,231,214,.34)}
+.form-section-title{font-family:Georgia,'Times New Roman',serif;font-size:19px;margin:0 0 4px}
+.form-section-subtitle{color:var(--k-pro-muted);font-size:13px;margin:0 0 16px}
+.empty.compact{padding:28px 16px}
+.empty.compact p{margin:0}
+.preview{box-shadow:0 5px 16px rgba(78,54,41,.08)}
+@media(max-width:800px){.main:before{height:130px}.top h1{font-size:25px}.card{padding:18px}.table-wrap{overflow-x:auto}.nav a{min-height:46px}}
+@media(max-width:480px){.top h1{font-size:23px}.page-kicker{font-size:9px}.card{padding:16px}}
+html[data-theme="escuro"] .main:before,body.dark .main:before{background:linear-gradient(180deg,rgba(217,170,108,.035),transparent)}
+html[data-theme="escuro"] .table tbody tr:hover,body.dark .table tbody tr:hover{background:rgba(255,255,255,.035)}
+html[data-theme="escuro"] .page-kicker,body.dark .page-kicker{color:#d9aa6c}
