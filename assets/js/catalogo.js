@@ -140,12 +140,19 @@ async function catalogoInicializar() {
     const root = document.getElementById('catalogoApp');
     if (!root) return;
     if (!catalogoSlug) return catalogoMsg('Link de loja inválido. Informe o parâmetro slug.', false);
-    const { data: loja, error: lojaError } = await supabaseClient.from('usuarios').select('*').eq('slug', catalogoSlug).maybeSingle();
-    if (lojaError || !loja) return catalogoMsg('Não foi possível encontrar esta loja.', false);
-    const { data: produtos, error: produtosError } = await supabaseClient.from('produtos').select('*').eq('usuario_id', loja.id).eq('mostrar_catalogo', true).order('data', { ascending: false });
-    if (produtosError) return catalogoMsg(produtosError.message, false);
-    catalogoLoja = loja;
-    catalogoProdutos = produtos || [];
+
+    // A RPC pública retorna somente os campos necessários ao catálogo.
+    // Isso evita expor colunas internas da tabela usuarios ao visitante.
+    const { data, error } = await supabaseClient.rpc('obter_catalogo_publico', {
+        p_slug: catalogoSlug
+    });
+
+    if (error || !data?.loja) {
+        return catalogoMsg(error?.message || 'Não foi possível encontrar esta loja.', false);
+    }
+
+    catalogoLoja = data.loja;
+    catalogoProdutos = data.produtos || [];
     catalogoRender();
 }
 
