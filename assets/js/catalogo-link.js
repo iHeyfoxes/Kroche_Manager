@@ -3,21 +3,10 @@
    Evita links com slug=undefined quando o perfil em cache está antigo.
    ============================================================ */
 (function () {
-    async function corrigirLinksCatalogo() {
-        if (!window.supabaseClient) return;
+    let slug = null;
 
-        const { data: { user } } = await supabaseClient.auth.getUser();
-        if (!user) return;
-
-        const { data, error } = await supabaseClient
-            .from('usuarios')
-            .select('slug')
-            .eq('id', user.id)
-            .maybeSingle();
-
-        if (error || !data?.slug) return;
-
-        const slug = encodeURIComponent(String(data.slug).trim());
+    function corrigirLinks() {
+        if (!slug) return;
 
         document.querySelectorAll('a[href]').forEach((link) => {
             const href = link.getAttribute('href') || '';
@@ -36,10 +25,23 @@
         });
     }
 
-    function iniciar() {
-        corrigirLinksCatalogo();
+    async function iniciar() {
+        if (!window.supabaseClient) return;
 
-        const observer = new MutationObserver(() => corrigirLinksCatalogo());
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        if (!user) return;
+
+        const { data, error } = await supabaseClient
+            .from('usuarios')
+            .select('slug')
+            .eq('id', user.id)
+            .maybeSingle();
+
+        if (error || !data?.slug) return;
+        slug = String(data.slug).trim();
+        corrigirLinks();
+
+        const observer = new MutationObserver(corrigirLinks);
         observer.observe(document.body, { childList: true, subtree: true });
     }
 
