@@ -136,6 +136,11 @@ async function exigirLogin() {
 
 (function carregarEstiloKroche() {
     const href = "assets/css/professional.css";
+    const jaCarregado = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some(link => {
+        const valor = link.getAttribute("href") || "";
+        return valor.split("?")[0].endsWith(href);
+    });
+    if (jaCarregado) return;
     if (document.querySelector(`link[data-kroche-style="${href}"]`)) return;
 
     const link = document.createElement("link");
