@@ -1,7 +1,4 @@
 /* Clientes */
-const safe=window.esc||((v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])));
-const money=window.money||((v)=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}));
-const notice=(text,ok=true)=>window.msg?window.msg(text,ok):alert(text);
 function addModuleLinks(){const nav=document.getElementById('appnav');if(!nav||nav.dataset.modules==='1')return;nav.dataset.modules='1';const anchor=nav.querySelector('a[href="leads.html"]');const html='<a href="clientes.html">🧑‍🤝‍🧑 <span>Clientes</span></a><a href="materiais.html">🧵 <span>Materiais e Estoque</span></a>';if(anchor)anchor.insertAdjacentHTML('afterend',html);else nav.insertAdjacentHTML('beforeend',html);const active=location.pathname.split('/').pop();nav.querySelectorAll('a[href]').forEach(a=>{if(a.getAttribute('href')===active)a.classList.add('active')})}
 
 async function initClientes(){
