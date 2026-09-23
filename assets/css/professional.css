@@ -111,3 +111,18 @@ body{background:var(--km-bg);font-family:Inter,"Segoe UI",Arial,sans-serif}
 @media(max-width:1000px){.main{margin-left:0}.sidebar{width:250px}.store-overview-hero{grid-template-columns:1fr}.store-overview-preview{min-height:190px}.store-grid-2{grid-template-columns:1fr}.metric-grid{grid-template-columns:1fr 1fr}.settings-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:650px){.modern-hero{padding:22px;align-items:flex-start;flex-direction:column}.modern-hero h2{font-size:25px}.store-tabs{width:100%;overflow:auto}.store-tab{white-space:nowrap}.store-overview-copy{padding:25px}.store-overview-copy h2{font-size:28px}.store-overview-actions{flex-direction:column}.store-product-row{grid-template-columns:48px 1fr auto}.store-product-row>.pill,.store-product-row>.stock-number{grid-column:2}.row-actions{grid-column:2}.metric-grid{grid-template-columns:1fr}.filter-inline,.filter-inline .input{min-width:0;width:100%}.panel-heading{flex-direction:column}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+
+/* Tema escuro: mantém a nova identidade sem perder contraste. */
+body.dark{background:#161210;color:#f7f2ed}
+.dark .sidebar{background:linear-gradient(180deg,#211a17 0%,#171311 100%);border-color:#3b2d27}
+.dark .main{background:radial-gradient(circle at 100% 0%,rgba(194,143,98,.09),transparent 30%),#161210}
+.dark .card,.dark .metric-card,.dark .quick-card{background:#251d1a;border-color:#3b2d27;color:#f7f2ed}
+.dark .input,.dark .select,.dark .textarea{background:#382b26;border-color:#4a3830;color:#fff}
+.dark .btn-secondary{background:#382b26;border-color:#4a3830;color:#fff}
+.dark .store-tabs{background:#2a211d}.dark .store-tab{color:#c8b8ae}.dark .store-tab.active{background:#3a2c25;color:#fff}
+.dark .store-overview-hero{background:linear-gradient(135deg,#4a352a,#684b39)}
+.dark .store-overview-preview{background:#604736}.dark .store-preview-placeholder{background:linear-gradient(145deg,#604736,#3f3028);color:#e3c5ad}
+.dark .store-product-thumb{background:#382b26}.dark .store-list-row,.dark .store-product-row{border-color:#3b2d27}
+.dark .settings-grid div{background:#2b211d;border-color:#44342c}.dark .pill{background:#382b26;color:#e8ddd6}.dark .pill.success{background:#294332;color:#b9ddc1}.dark .pill.danger{background:#4a2926;color:#f1b2ab}
+.dark .modern-hero{background:linear-gradient(135deg,#251d1a,#342821)}
+.dark .table th{background:#382b26}.dark .table td{border-color:#3b2d27}.dark .empty-state-small{color:#b9aaa0}
