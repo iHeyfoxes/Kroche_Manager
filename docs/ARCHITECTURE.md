@@ -2,224 +2,142 @@
 
 ## 1. Visão geral
 
-O Kroche Manager é atualmente um frontend estático:
+O Kroche Manager é um frontend estático organizado por camadas:
 
-- **HTML**: páginas e pontos de entrada.
-- **CSS**: estilos compartilhados e estilos específicos.
-- **JavaScript**: autenticação, navegação, regras de interface e chamadas ao Supabase.
+- **HTML**: pontos de entrada das telas.
+- **CSS**: identidade visual e componentes compartilhados.
+- **JavaScript**: core + features por domínio.
 - **Supabase**: Auth, PostgreSQL, RLS, Storage e funções do catálogo.
 
-Fluxo simplificado:
+Fluxo: HTML → app.js → core/features → Supabase
 
-`HTML → JavaScript → Supabase`
+O catálogo público continua separado: loja/*.html → assets/js/catalogo.js → Supabase
 
-O catálogo público usa:
+## 2. Navegação atual
 
-`loja/*.html → assets/js/catalogo.js → Supabase`
+O painel principal é organizado por domínio:
 
-## 2. Estrutura atual
+- Dashboard
+- Vendas
+- Compras
+- Encomendas
+- Estoque
+- Receitas
+- Leads
+- Minha Loja
+- Relatórios
+- Calculadora
+- Ajuda
+- Meu Perfil
 
-```text
-Kroche_Manager/
-├── *.html                     # páginas do sistema
-├── loja/                      # catálogo público
-├── assets/
-│   ├── css/                   # estilos
-│   └── js/                    # lógica do frontend
-├── supabase/                  # SQL/schema relacionado ao projeto
-├── README.md
-├── CONTRIBUTING.md
-└── docs/
-    └── ARCHITECTURE.md
-```
+**Produtos não é mais uma área de primeiro nível.** Produtos e categorias são administrados dentro de **Minha Loja**.
 
-### Páginas principais
+A antiga tela de Clientes foi removida da navegação. Os dados da tabela "clientes" permanecem no banco para evitar perda de dados.
 
-| Arquivo | Responsabilidade |
-|---|---|
-| `dashboard.html` | visão geral |
-| `produtos.html` | produtos |
-| `vendas.html` | vendas |
-| `compras.html` | compras |
-| `receitas.html` | receitas |
-| `encomendas.html` | encomendas |
-| `leads.html` | clientes/leads |
-| `relatorios.html` | relatórios |
-| `minha-loja.html` | configuração/resumo da loja |
-| `minha-loja-editar.html` | edição da loja |
-| `perfil.html` | conta e perfil |
-| `ajuda.html` | ajuda |
-| `loja/\` | experiência pública do catálogo |
+A antiga tela de Materiais e Estoque foi substituída por **Estoque**. A tabela "materiais" permanece como base de dados do inventário.
 
-## 3. JavaScript
-
-Hoje existe uma parte importante da aplicação concentrada em:
-
-`assets/js/app.js`
-
-Ele contém código compartilhado e inicialização de várias páginas. Isso funciona, mas dificulta manutenção quando o sistema cresce.
-
-### Estrutura de organização
-
-Novas funcionalidades devem seguir esta separação:
+## 3. Estrutura JavaScript
 
 ```text
 assets/js/
-├── core/                 # infraestrutura compartilhada
+├── app.js                       # entrypoint/orquestrador
+├── core/
 │   ├── auth.js
 │   ├── supabase.js
 │   ├── session.js
 │   ├── theme.js
-│   └── utils.js
-│
-├── layout/               # shell, menu e navegação
+│   ├── utils.js
 │   ├── layout.js
-│   └── navigation.js
+│   └── error-handler.js
 │
-├── features/             # regras por domínio
+├── features/
 │   ├── dashboard/
-│   ├── produtos/
 │   ├── vendas/
 │   ├── compras/
 │   ├── receitas/
 │   ├── encomendas/
 │   ├── leads/
-│   ├── loja/
-│   └── perfil/
+│   ├── relatorios/
+│   ├── calculadora/
+│   ├── ajuda/
+│   ├── perfil/
+│   ├── editar-venda/
+│   ├── editar-encomenda/
+│   ├── estoque/
+│   │   └── estoque.js
+│   └── minha-loja/
+│       ├── minha-loja.js
+│       ├── produtos.js
+│       └── categorias.js
 │
-└── catalogo/             # experiência pública
-    ├── catalogo.js
-    ├── produto.js
-    └── carrinho.js
+└── catalogo.js                 # catálogo público
 ```
 
-**Importante:** a estrutura acima representa a organização atual do frontend após a refatoração. Arquivos de compatibilidade devem ser removidos somente após validar todas as referências.
+### Regra de responsabilidade
 
-## 4. CSS
+- "core/": infraestrutura reutilizável.
+- "features/": regras de negócio da área.
+- "minha-loja/": tudo relacionado à administração do catálogo.
+- "catalogo.js": somente experiência pública do cliente.
 
-Atualmente existem folhas com responsabilidades parcialmente sobrepostas.
+Evite colocar regra de produtos dentro de "app.js". O "app.js" apenas carrega módulos e escolhe a tela inicial.
 
-Direção recomendada:
+## 4. Minha Loja
 
-```text
-assets/css/
-├── base.css              # variáveis, reset e elementos básicos
-├── layout.css            # sidebar, header e containers
-├── components.css        # cards, botões, tabelas, formulários
-├── pages/
-│   ├── dashboard.css
-│   ├── produtos.css
-│   ├── vendas.css
-│   └── ...
-├── catalogo.css          # catálogo público
-└── auth.css              # login/cadastro
-```
+Minha Loja é o centro administrativo do catálogo.
 
-Não crie uma nova folha CSS global para cada pequena alteração. Primeiro procure uma classe/componente existente.
+### Produtos
 
-## 5. Supabase
+"features/minha-loja/produtos.js" é responsável por cadastrar, editar, excluir, preço, quantidade, foto, categoria, visibilidade no catálogo e tempo de produção.
 
-```text
-supabase/
-├── schema.sql
-├── catalogo_pedidos.sql
-└── migrations/           # recomendado para próximas alterações versionadas
-```
+### Categorias
 
-Toda alteração de estrutura do banco deve ser documentada e versionada.
+"features/minha-loja/categorias.js" é responsável por criar, listar e excluir categorias e relacionar produtos através de "categoria_id".
 
-### Segurança
+### Aparência
 
-O frontend não é uma camada de segurança.
+"features/minha-loja/minha-loja.js" é responsável por nome, slogan, WhatsApp, banner, cores e opções de exibição.
 
-A proteção real dos dados deve continuar no Supabase:
+## 5. Estoque
 
-- RLS;
-- permissões de funções;
-- políticas de Storage;
-- funções `SECURITY DEFINER` quando realmente necessárias.
+"features/estoque/estoque.js" usa a tabela "materiais" e concentra cadastro, quantidade, estoque mínimo, custo unitário, fornecedor, busca, alertas de reposição e valor estimado.
 
-## 6. Regra de dependências
+A exclusão da tela antiga **não exclui a tabela nem os dados**.
 
-A direção deve ser:
+## 6. CSS e design
 
-```text
-core
-  ↓
-layout
-  ↓
-features
-  ↓
-pages/catalogo
-```
+A identidade visual atual é centralizada principalmente em:
 
-Uma feature pode usar o core. Evite criar dependências circulares entre páginas.
+- "assets/css/app.css"
+- "assets/css/professional.css"
+- "assets/css/catalogo.css"
 
-## 7. Convenções de código
+A direção visual usa interface moderna, estética artesanal premium, tons creme/marrom/caramelo, cards suaves, sombras discretas, hierarquia tipográfica clara, responsividade e modo claro/escuro.
 
-### JavaScript
+## 7. Banco de dados
 
-- funções pequenas e com uma responsabilidade;
-- nomes descritivos;
-- evitar funções gigantes;
-- evitar HTML extenso dentro de funções quando um componente reutilizável resolver o problema;
-- usar `async/await` para operações assíncronas;
-- validar dados antes de enviar ao Supabase;
-- escapar dados exibidos no HTML.
+A estrutura de categorias foi versionada em "supabase/migrations/20260923181007_create_product_categories.sql".
 
-### HTML
+Ela cria "categorias_produtos" e adiciona "produtos.categoria_id".
 
-- uma página = uma responsabilidade principal;
-- IDs apenas quando JavaScript realmente precisa deles;
-- classes reutilizáveis para aparência;
-- evitar estilos inline novos.
+O campo textual antigo "produtos.categoria" permanece por compatibilidade durante a migração gradual.
 
-### CSS
+## 8. Segurança
 
-- preferir classes;
-- centralizar cores e espaçamentos em variáveis;
-- evitar `!important` como solução padrão;
-- evitar duplicar componentes existentes.
+A segurança continua no Supabase: RLS por usuário, permissões de função, políticas de Storage, funções SECURITY DEFINER somente quando necessárias e nenhuma chave service_role no frontend.
 
-## 8. Regra para novos desenvolvedores
+A função pública do catálogo deve continuar sendo acessada pelo RPC controlado, e não por leitura direta irrestrita das tabelas.
 
-Se você precisa descobrir onde alterar algo:
+## 9. Regra para novos desenvolvedores
 
-1. descubra qual página apresenta o problema;
-2. descubra qual JS inicializa essa página;
-3. descubra quais tabelas/funções do Supabase ela usa;
-4. altere somente a camada necessária;
-5. teste o fluxo completo.
+Para alterar uma funcionalidade:
 
-## 9. Catálogo público
+1. encontre a tela;
+2. encontre o módulo em "features/";
+3. identifique as consultas Supabase;
+4. reutilize "core/" quando possível;
+5. altere somente a camada necessária;
+6. valide o fluxo completo;
+7. documente alterações estruturais do banco.
 
-O catálogo é uma área especial porque pode ser acessado sem login.
-
-Fluxo:
-
-`slug da loja → usuário → produtos publicados → carrinho → lead → WhatsApp`
-
-Qualquer alteração no catálogo deve ser testada com:
-
-- slug válido;
-- slug inválido;
-- loja sem produtos;
-- produto com foto;
-- produto sem foto;
-- carrinho;
-- envio do pedido;
-- WhatsApp configurado e não configurado.
-
-## 10. Objetivo da refatoração
-
-A meta não é simplesmente criar mais pastas.
-
-A meta é fazer com que um desenvolvedor consiga responder rapidamente:
-
-- onde está a tela?
-- onde está a regra?
-- onde está a consulta ao banco?
-- onde está o estilo?
-- qual parte posso alterar sem quebrar outra?
-
-Toda nova funcionalidade deve aproximar o projeto dessa organização.
+O objetivo é que outro desenvolvedor consiga entender onde está a tela, onde está a regra, onde está o banco e onde está o estilo sem precisar procurar lógica espalhada pelo projeto.
