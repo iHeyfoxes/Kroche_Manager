@@ -1,29 +1,43 @@
-# JavaScript
+# JavaScript do Kroche Manager
 
-## Responsabilidades
+## Estrutura
 
-A pasta contém a lógica do frontend.
+```text
+assets/js/
+├── core/                 # infraestrutura compartilhada
+├── features/             # funcionalidades do sistema
+│   ├── dashboard/
+│   ├── produtos/
+│   ├── vendas/
+│   ├── compras/
+│   ├── receitas/
+│   ├── encomendas/
+│   ├── leads/
+│   ├── relatorios/
+│   ├── calculadora/
+│   ├── minha-loja/
+│   └── perfil/
+├── catalogo.js           # catálogo público
+├── catalogo-link.js      # correção do link público
+├── minha-loja-link.js    # link da loja
+├── auth.js               # autenticação atual
+├── atelier-modules.js    # módulos auxiliares históricos
+├── navigation-enhancements.js
+├── supabaseConfig.js
+└── app.js                # entrypoint/compatibilidade
+```
 
-### Arquivos atuais
+## Regra de manutenção
 
-- `app.js`: lógica compartilhada e inicialização de várias telas. É um arquivo legado importante e deve ser reduzido gradualmente.
-- `auth.js`: autenticação e operações relacionadas à sessão.
-- `supabaseConfig.js`: configuração pública do cliente Supabase.
-- `catalogo.js`: lógica específica do catálogo.
-- `catalogo-link.js`: construção/abertura do link do catálogo.
-- `minha-loja-link.js`: ações relacionadas ao link da loja.
-- `navigation-enhancements.js`: melhorias de navegação.
-- `atelier-modules.js`: módulos/rotinas auxiliares do sistema.
+- Funcionalidade nova deve entrar no módulo correspondente em `features/`.
+- Código compartilhado deve ir para `core/`.
+- Código exclusivo do catálogo público deve ficar separado do painel.
+- Evite aumentar `app.js` ou `features/pages.js`.
+- Não duplique funções utilitárias; primeiro procure em `core/`.
+- Não coloque credenciais privadas no frontend.
 
-## Regra
+## Migração do legado
 
-Não coloque uma nova funcionalidade grande em `app.js`.
+`features/pages.js` permanece temporariamente como camada de compatibilidade. Os módulos são extraídos gradualmente e só depois o legado será removido.
 
-A organização futura deve separar:
-
-- infraestrutura;
-- layout;
-- funcionalidades;
-- catálogo público.
-
-Consulte `docs/ARCHITECTURE.md`.
+Isso permite refatorar sem alterar o comportamento do sistema em uma única mudança grande.
