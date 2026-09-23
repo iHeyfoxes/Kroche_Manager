@@ -120,13 +120,13 @@ A estrutura de categorias foi versionada em "supabase/migrations/20260923181007_
 
 Ela cria "categorias_produtos" e adiciona "produtos.categoria_id".
 
-O campo textual antigo "produtos.categoria" permanece por compatibilidade durante a migração gradual.
+O campo textual antigo "produtos.categoria" permanece por compatibilidade durante a migração gradual.\n\nA migration `20260923185608_catalog_orders_and_stock.sql` cria `pedidos_catalogo` e `pedido_itens`, liga pedidos à tela de Encomendas e registra as funções transacionais de checkout/cancelamento. A migration `20260923190000_protect_catalog_reserved_stock.sql` impede excluir produtos ou alterar manualmente sua quantidade enquanto houver pedido do catálogo em andamento.
 
 ## 8. Segurança
 
 A segurança continua no Supabase: RLS por usuário, permissões de função, políticas de Storage, funções SECURITY DEFINER somente quando necessárias e nenhuma chave service_role no frontend.
 
-A função pública do catálogo deve continuar sendo acessada pelo RPC controlado, e não por leitura direta irrestrita das tabelas.
+A função pública do catálogo deve continuar sendo acessada pelo RPC controlado, e não por leitura direta irrestrita das tabelas.\n\n### Pedidos do catálogo\n\nO checkout público usa `pedidos_catalogo` como cabeçalho e `pedido_itens` como linhas do pedido. A função `finalizar_pedido_catalogo` executa a operação dentro de uma transação do PostgreSQL, bloqueia os produtos com `FOR UPDATE`, valida o estoque e só então baixa as quantidades. Um pedido do catálogo também cria uma encomenda vinculada por `encomendas.pedido_catalogo_id`, permitindo que o painel acompanhe o pedido.\n\nCancelamentos devem usar `cancelar_pedido_catalogo`, que devolve as quantidades ao estoque e sincroniza o status da encomenda. A chave service role não é usada no checkout.
 
 ## 9. Regra para novos desenvolvedores
 
