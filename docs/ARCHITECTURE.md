@@ -116,7 +116,7 @@ A direção visual usa interface moderna, estética artesanal premium, tons crem
 
 ## 7. Banco de dados
 
-A estrutura de categorias foi versionada em "supabase/migrations/20260923100000_create_product_categories.sql".
+A estrutura de categorias foi versionada em "supabase/migrations/20260923181007_create_product_categories.sql".
 
 Ela cria "categorias_produtos" e adiciona "produtos.categoria_id".
 
