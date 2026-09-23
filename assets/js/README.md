@@ -5,6 +5,7 @@
 ```text
 assets/js/
 ├── core/                     # infraestrutura compartilhada
+│   ├── supabase.js
 │   ├── utils.js
 │   ├── theme.js
 │   ├── session.js
@@ -31,10 +32,8 @@ assets/js/
 ├── catalogo.js               # catálogo público
 ├── catalogo-link.js          # link público
 ├── minha-loja-link.js        # link da loja
-├── navigation-enhancements.js
-├── supabaseConfig.js
+├── supabaseConfig.js         # loader de compatibilidade
 ├── auth.js                   # loader de compatibilidade das páginas públicas
-├── atelier-modules.js        # compatibilidade temporária
 └── app.js                    # entrypoint do painel
 ```
 
