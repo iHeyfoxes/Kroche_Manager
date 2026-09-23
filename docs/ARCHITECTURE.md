@@ -141,3 +141,8 @@ Para alterar uma funcionalidade:
 7. documente alterações estruturais do banco.
 
 O objetivo é que outro desenvolvedor consiga entender onde está a tela, onde está a regra, onde está o banco e onde está o estilo sem precisar procurar lógica espalhada pelo projeto.
+
+
+## Pedidos do catálogo
+
+O checkout público usa `pedidos_catalogo` como cabeçalho e `pedido_itens` para os itens. A função `finalizar_pedido_catalogo` valida o estoque com bloqueio de linha (`FOR UPDATE`), cria o pedido, baixa o estoque e cria a encomenda administrativa em uma única transação. O cliente recebe um resumo do pedido para enviar ao WhatsApp da loja. O cancelamento administrativo usa `cancelar_pedido_catalogo` para devolver as quantidades ao estoque. Não deve ser implementada baixa de estoque no JavaScript: a regra de concorrência fica no banco.
