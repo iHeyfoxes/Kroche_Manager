@@ -4,7 +4,7 @@
 (function(){
   const base='assets/js/';
   const modules=[
-    'core/utils.js','core/theme.js','core/session.js','core/layout.js','core/auth.js','core/error-handler.js',
+    'core/supabase.js','core/utils.js','core/theme.js','core/session.js','core/layout.js','core/auth.js','core/error-handler.js',
     'features/dashboard/dashboard.js','features/produtos/produtos.js','features/vendas/vendas.js',
     'features/compras/compras.js','features/receitas/receitas.js','features/encomendas/encomendas.js',
     'features/leads/leads.js','features/relatorios/relatorios.js','features/calculadora/calculadora.js',
