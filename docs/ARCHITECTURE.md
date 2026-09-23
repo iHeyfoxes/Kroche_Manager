@@ -120,7 +120,7 @@ A estrutura de categorias foi versionada em "supabase/migrations/20260923181007_
 
 Ela cria "categorias_produtos" e adiciona "produtos.categoria_id".
 
-O campo textual antigo "produtos.categoria" permanece por compatibilidade durante a migração gradual.\n\nA migration `20260923185608_catalog_orders_and_stock.sql` cria `pedidos_catalogo` e `pedido_itens`, liga pedidos à tela de Encomendas e registra as funções transacionais de checkout/cancelamento.
+O campo textual antigo "produtos.categoria" permanece por compatibilidade durante a migração gradual.\n\nA migration `20260923185608_catalog_orders_and_stock.sql` cria `pedidos_catalogo` e `pedido_itens`, liga pedidos à tela de Encomendas e registra as funções transacionais de checkout/cancelamento. A migration `20260923190000_protect_catalog_reserved_stock.sql` impede excluir produtos ou alterar manualmente sua quantidade enquanto houver pedido do catálogo em andamento.
 
 ## 8. Segurança
 
