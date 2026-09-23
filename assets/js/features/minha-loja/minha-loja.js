@@ -13,7 +13,20 @@ async function initMinhaLoja(edit=false){
       '<div class="actions"><button class="btn btn-primary">Salvar aparência</button></div></form></div>';
     const f=document.getElementById('lojaForm');
     ['catalogo_nome','catalogo_slogan','whatsapp','catalogo_cor','catalogo_cor_botao','catalogo_cor_fundo'].forEach(k=>f.elements[k].value=p[k]||'');
-    f.onsubmit=async e=>{e.preventDefault();try{const fd=new FormData(e.target);let banner=p.catalogo_banner;if(fd.get('banner')?.size)banner=await upload('banners',fd.get('banner'),u.id);const data={catalogo_nome:fd.get('catalogo_nome'),catalogo_slogan:fd.get('catalogo_slogan'),whatsapp:fd.get('whatsapp'),catalogo_cor:fd.get('catalogo_cor'),catalogo_cor_botao:fd.get('catalogo_cor_botao'),catalogo_cor_fundo:fd.get('catalogo_cor_fundo'),mostrar_preco:fd.has('mostrar_preco'),mostrar_estoque:fd.has('mostrar_estoque'),mostrar_tempo:fd.has('mostrar_tempo'),catalogo_banner:banner};const r=await supabaseClient.from('usuarios').update(data).eq('id',u.id);if(r.error)msg(r.error.message,false);else{try{sessionStorage.removeItem('kroche_profile_'+u.id)}catch{};_profileCache=null;msg('Aparência atualizada!');setTimeout(()=>location.href='minha-loja.html',500)}};
+    f.onsubmit=async e=>{e.preventDefault();try{
+      const fd=new FormData(e.target);
+      let banner=p.catalogo_banner;
+      if(fd.get('banner')?.size)banner=await upload('banners',fd.get('banner'),u.id);
+      const data={catalogo_nome:fd.get('catalogo_nome'),catalogo_slogan:fd.get('catalogo_slogan'),whatsapp:fd.get('whatsapp'),catalogo_cor:fd.get('catalogo_cor'),catalogo_cor_botao:fd.get('catalogo_cor_botao'),catalogo_cor_fundo:fd.get('catalogo_cor_fundo'),mostrar_preco:fd.has('mostrar_preco'),mostrar_estoque:fd.has('mostrar_estoque'),mostrar_tempo:fd.has('mostrar_tempo'),catalogo_banner:banner};
+      const r=await supabaseClient.from('usuarios').update(data).eq('id',u.id);
+      if(r.error)msg(r.error.message,false);
+      else{
+        try{sessionStorage.removeItem('kroche_profile_'+u.id)}catch{}
+        _profileCache=null;
+        msg('Aparência atualizada!');
+        setTimeout(()=>location.href='minha-loja.html',500);
+      }
+    }catch(error){msg(error?.message||'Não foi possível salvar a aparência da loja.',false)}}; 
     return;
   }
 
