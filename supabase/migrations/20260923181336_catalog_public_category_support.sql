@@ -28,7 +28,7 @@ begin
             'tempo_producao',p.tempo_producao,
             'mostrar_catalogo',p.mostrar_catalogo,
             'categoria_id',p.categoria_id,
-            'categoria',c.nome
+            'categoria',coalesce(c.nome,p.categoria)
         ) order by p.data desc
     ),'[]'::jsonb)
     into v_produtos
