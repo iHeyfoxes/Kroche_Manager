@@ -4,11 +4,12 @@ const catalogoSlug=(catalogoParams.get('slug')||'').trim();
 const catalogoMoney=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const catalogoEsc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 let catalogoLoja=null,catalogoProdutos=[],catalogoBusca='',catalogoCategoria='todos',catalogoOrdenacao='recentes',catalogoEstoque=false,catalogoPrecoMax=0;
-let catalogoCarrinho=JSON.parse(localStorage.getItem('km_catalogo_carrinho')||'[]');
-let catalogoFavoritos=JSON.parse(localStorage.getItem('km_catalogo_favoritos')||'[]');
+const catalogoStorageKey=tipo=>'km_catalogo_'+tipo+'_'+(catalogoSlug||'sem-loja');
+let catalogoCarrinho=JSON.parse(localStorage.getItem(catalogoStorageKey('carrinho'))||'[]');
+let catalogoFavoritos=JSON.parse(localStorage.getItem(catalogoStorageKey('favoritos'))||'[]');
 
-function catalogoSave(){localStorage.setItem('km_catalogo_carrinho',JSON.stringify(catalogoCarrinho))}
-function catalogoFavSave(){localStorage.setItem('km_catalogo_favoritos',JSON.stringify(catalogoFavoritos))}
+function catalogoSave(){localStorage.setItem(catalogoStorageKey('carrinho'),JSON.stringify(catalogoCarrinho))}
+function catalogoFavSave(){localStorage.setItem(catalogoStorageKey('favoritos'),JSON.stringify(catalogoFavoritos))}
 function catalogoQtd(){return catalogoCarrinho.reduce((s,i)=>s+Number(i.quantidade||0),0)}
 function catalogoCategorias(){return [...new Set(catalogoProdutos.filter(p=>p.mostrar_catalogo).map(p=>String(p.categoria||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'))}
 function catalogoLista(){
