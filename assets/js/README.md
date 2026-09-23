@@ -4,8 +4,14 @@
 
 ```text
 assets/js/
-├── core/                 # infraestrutura compartilhada
-├── features/             # funcionalidades do sistema
+├── core/                     # infraestrutura compartilhada
+│   ├── utils.js
+│   ├── theme.js
+│   ├── session.js
+│   ├── layout.js
+│   ├── auth.js
+│   └── error-handler.js
+├── features/                 # funcionalidades por domínio
 │   ├── dashboard/
 │   ├── produtos/
 │   ├── vendas/
@@ -15,29 +21,37 @@ assets/js/
 │   ├── leads/
 │   ├── relatorios/
 │   ├── calculadora/
+│   ├── ajuda/
 │   ├── minha-loja/
-│   └── perfil/
-├── catalogo.js           # catálogo público
-├── catalogo-link.js      # correção do link público
-├── minha-loja-link.js    # link da loja
-├── auth.js               # autenticação atual
-├── atelier-modules.js    # módulos auxiliares históricos
+│   ├── perfil/
+│   ├── editar-venda/
+│   ├── editar-encomenda/
+│   ├── clientes/
+│   └── materiais/
+├── catalogo.js               # catálogo público
+├── catalogo-link.js          # link público
+├── minha-loja-link.js        # link da loja
 ├── navigation-enhancements.js
 ├── supabaseConfig.js
-└── app.js                # entrypoint/compatibilidade
+├── auth.js                   # loader de compatibilidade das páginas públicas
+├── atelier-modules.js        # compatibilidade temporária
+└── app.js                    # entrypoint do painel
 ```
+
+## Fluxo do painel
+
+As páginas internas carregam `assets/js/app.js`. Ele carrega primeiro o `core/` e depois os módulos de `features/`. Por fim, identifica a página atual e inicializa apenas a funcionalidade correspondente.
 
 ## Regra de manutenção
 
-- Funcionalidade nova deve entrar no módulo correspondente em `features/`.
-- Código compartilhado deve ir para `core/`.
-- Código exclusivo do catálogo público deve ficar separado do painel.
-- Evite aumentar `app.js` ou `features/pages.js`.
-- Não duplique funções utilitárias; primeiro procure em `core/`.
-- Não coloque credenciais privadas no frontend.
+- Funcionalidade nova deve entrar em `features/`.
+- Código compartilhado deve entrar em `core/`.
+- Catálogo público permanece separado do painel.
+- `app.js` deve continuar sendo apenas um entrypoint/orquestrador.
+- Não adicionar novas regras de negócio em `features/pages.js`.
+- Procurar uma função existente em `core/` antes de criar outra.
+- Nunca colocar chaves privadas ou service role no frontend.
 
-## Migração do legado
+## Compatibilidade
 
-`features/pages.js` permanece temporariamente como camada de compatibilidade. Os módulos são extraídos gradualmente e só depois o legado será removido.
-
-Isso permite refatorar sem alterar o comportamento do sistema em uma única mudança grande.
+Alguns arquivos raiz ainda existem para manter páginas antigas funcionando durante a migração. Eles devem ser removidos somente depois da validação de todas as páginas que os referenciam.
