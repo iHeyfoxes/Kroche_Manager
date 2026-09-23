@@ -1,0 +1,8 @@
+/* Utilitários compartilhados */
+const money = n => Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+function msg(text,ok=true){const el=document.getElementById('msg');if(el){el.className='alert '+(ok?'ok':'err');el.textContent=text;el.hidden=false;setTimeout(()=>el.hidden=true,3500)}}
+function formField(label,name,type='text',extra=''){return `<div><label class="label">${label}</label><input class="input" name="${name}" type="${type}" ${extra}></div>`}
+async function upload(bucket,file,userId){if(!file)return null;const allowed=['image/jpeg','image/png','image/webp'];if(!allowed.includes(file.type))throw new Error('Escolha uma imagem JPG, PNG ou WEBP.');if(file.size>5*1024*1024)throw new Error('A imagem deve ter no máximo 5 MB.');const ext=(file.name.split('.').pop()||'jpg').toLowerCase();const path=`${userId}/${crypto.randomUUID()}.${ext}`;const {error}=await supabaseClient.storage.from(bucket).upload(path,file,{upsert:false,contentType:file.type,cacheControl:'3600'});if(error)throw new Error(`Não foi possível enviar a imagem: ${error.message}. Verifique as políticas do Storage no Supabase.`);return supabaseClient.storage.from(bucket).getPublicUrl(path).data.publicUrl}
+async function q(table,field){const u=await user();if(!u)return {data:null,error:{message:'Sem sessão'}};return supabaseClient.from(table).select('*').eq(field||'user_id',u.id)}
+async function del(table,id,field){const u=await user();if(!u)return;const {error}=await supabaseClient.from(table).delete().eq('id',id).eq(field||'user_id',u.id);if(error)throw error}

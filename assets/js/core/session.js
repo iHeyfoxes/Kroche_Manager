@@ -1,0 +1,4 @@
+/* Sessão e perfil do usuário */
+let _profileCache=null;
+async function user(){const {data:{user},error}=await supabaseClient.auth.getUser();if(error||!user){location.href='login.html';return null}return user}
+async function profile(){if(_profileCache)return _profileCache;const u=await user();if(!u)return null;const cacheKey='kroche_profile_'+u.id;try{const cached=JSON.parse(sessionStorage.getItem(cacheKey)||'null');if(cached){_profileCache=cached;return cached}}catch{}const {data,error}=await supabaseClient.from('usuarios').select('*').eq('id',u.id).maybeSingle();if(data){_profileCache=data;try{sessionStorage.setItem(cacheKey,JSON.stringify(data))}catch{};return data}console.warn('Perfil não encontrado:',error?.message||'sem registro');const fallback={id:u.id,nome:u.user_metadata?.nome||u.email?.split('@')[0]||'Usuário',tema:getSavedTheme(),_fallback:true};_profileCache=fallback;return fallback}

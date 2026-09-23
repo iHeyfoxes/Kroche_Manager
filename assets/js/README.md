@@ -1,29 +1,56 @@
-# JavaScript
+# JavaScript do Kroche Manager
 
-## Responsabilidades
+## Estrutura
 
-A pasta contém a lógica do frontend.
+```text
+assets/js/
+├── core/                     # infraestrutura compartilhada
+│   ├── supabase.js
+│   ├── utils.js
+│   ├── theme.js
+│   ├── session.js
+│   ├── layout.js
+│   ├── auth.js
+│   └── error-handler.js
+├── features/                 # funcionalidades por domínio
+│   ├── dashboard/
+│   ├── produtos/
+│   ├── vendas/
+│   ├── compras/
+│   ├── receitas/
+│   ├── encomendas/
+│   ├── leads/
+│   ├── relatorios/
+│   ├── calculadora/
+│   ├── ajuda/
+│   ├── minha-loja/
+│   ├── perfil/
+│   ├── editar-venda/
+│   ├── editar-encomenda/
+│   ├── clientes/
+│   └── materiais/
+├── catalogo.js               # catálogo público
+├── catalogo-link.js          # link público
+├── minha-loja-link.js        # link da loja
+├── supabaseConfig.js         # loader de compatibilidade
+├── auth.js                   # loader de compatibilidade das páginas públicas
+└── app.js                    # entrypoint do painel
+```
 
-### Arquivos atuais
+## Fluxo do painel
 
-- `app.js`: lógica compartilhada e inicialização de várias telas. É um arquivo legado importante e deve ser reduzido gradualmente.
-- `auth.js`: autenticação e operações relacionadas à sessão.
-- `supabaseConfig.js`: configuração pública do cliente Supabase.
-- `catalogo.js`: lógica específica do catálogo.
-- `catalogo-link.js`: construção/abertura do link do catálogo.
-- `minha-loja-link.js`: ações relacionadas ao link da loja.
-- `navigation-enhancements.js`: melhorias de navegação.
-- `atelier-modules.js`: módulos/rotinas auxiliares do sistema.
+As páginas internas carregam `assets/js/app.js`. Ele carrega primeiro o `core/` e depois os módulos de `features/`. Por fim, identifica a página atual e inicializa apenas a funcionalidade correspondente.
 
-## Regra
+## Regra de manutenção
 
-Não coloque uma nova funcionalidade grande em `app.js`.
+- Funcionalidade nova deve entrar em `features/`.
+- Código compartilhado deve entrar em `core/`.
+- Catálogo público permanece separado do painel.
+- `app.js` deve continuar sendo apenas um entrypoint/orquestrador.
+- Não adicionar novas regras de negócio em `features/pages.js`.
+- Procurar uma função existente em `core/` antes de criar outra.
+- Nunca colocar chaves privadas ou service role no frontend.
 
-A organização futura deve separar:
+## Compatibilidade
 
-- infraestrutura;
-- layout;
-- funcionalidades;
-- catálogo público.
-
-Consulte `docs/ARCHITECTURE.md`.
+Alguns arquivos raiz ainda existem para manter páginas antigas funcionando durante a migração. Eles devem ser removidos somente depois da validação de todas as páginas que os referenciam.

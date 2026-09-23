@@ -15,7 +15,7 @@ Fluxo simplificado:
 
 O catálogo público usa:
 
-`loja/*.html → assets/js/app.js → Supabase`
+`loja/*.html → assets/js/catalogo.js → Supabase`
 
 ## 2. Estrutura atual
 
@@ -59,7 +59,7 @@ Hoje existe uma parte importante da aplicação concentrada em:
 
 Ele contém código compartilhado e inicialização de várias páginas. Isso funciona, mas dificulta manutenção quando o sistema cresce.
 
-### Direção de organização
+### Estrutura de organização
 
 Novas funcionalidades devem seguir esta separação:
 
@@ -93,7 +93,7 @@ assets/js/
     └── carrinho.js
 ```
 
-**Importante:** esta é a estrutura-alvo. A migração deve ser gradual para não quebrar o sistema atual.
+**Importante:** a estrutura acima representa a organização atual do frontend após a refatoração. Arquivos de compatibilidade devem ser removidos somente após validar todas as referências.
 
 ## 4. CSS
 
