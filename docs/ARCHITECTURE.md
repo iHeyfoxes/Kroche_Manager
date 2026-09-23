@@ -102,7 +102,7 @@ Minha Loja é o centro administrativo do catálogo.
 
 "features/estoque/estoque.js" usa a tabela "materiais" e concentra cadastro, quantidade, estoque mínimo, custo unitário, fornecedor, busca, alertas de reposição e valor estimado.
 
-A exclusão da tela antiga **não exclui a tabela nem os dados**.
+A exclusão da tela antiga **não exclui a tabela nem os dados**. Compras registradas pelo painel usam `registrar_compra_estoque`, que cria ou localiza o material e atualiza a quantidade em uma única operação transacional. A exclusão de uma compra usa `excluir_compra_estoque` e desfaz a entrada no estoque quando isso é seguro.
 
 ## 6. CSS e design
 
