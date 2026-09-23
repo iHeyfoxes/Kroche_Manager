@@ -4,11 +4,12 @@ const catalogoSlug=(catalogoParams.get('slug')||'').trim();
 const catalogoMoney=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const catalogoEsc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 let catalogoLoja=null,catalogoProdutos=[],catalogoBusca='',catalogoCategoria='todos',catalogoOrdenacao='recentes',catalogoEstoque=false,catalogoPrecoMax=0;
-let catalogoCarrinho=JSON.parse(localStorage.getItem('km_catalogo_carrinho')||'[]');
-let catalogoFavoritos=JSON.parse(localStorage.getItem('km_catalogo_favoritos')||'[]');
+const catalogoStorageKey=tipo=>'km_catalogo_'+tipo+'_'+(catalogoSlug||'sem-loja');
+let catalogoCarrinho=JSON.parse(localStorage.getItem(catalogoStorageKey('carrinho'))||'[]');
+let catalogoFavoritos=JSON.parse(localStorage.getItem(catalogoStorageKey('favoritos'))||'[]');
 
-function catalogoSave(){localStorage.setItem('km_catalogo_carrinho',JSON.stringify(catalogoCarrinho))}
-function catalogoFavSave(){localStorage.setItem('km_catalogo_favoritos',JSON.stringify(catalogoFavoritos))}
+function catalogoSave(){localStorage.setItem(catalogoStorageKey('carrinho'),JSON.stringify(catalogoCarrinho))}
+function catalogoFavSave(){localStorage.setItem(catalogoStorageKey('favoritos'),JSON.stringify(catalogoFavoritos))}
 function catalogoQtd(){return catalogoCarrinho.reduce((s,i)=>s+Number(i.quantidade||0),0)}
 function catalogoCategorias(){return [...new Set(catalogoProdutos.filter(p=>p.mostrar_catalogo).map(p=>String(p.categoria||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'))}
 function catalogoLista(){
@@ -61,7 +62,7 @@ async function catalogoFinalizar(ev){
  const r=await supabaseClient.rpc('finalizar_pedido_catalogo',{p_slug:catalogoSlug,p_cliente:cliente,p_telefone:telefone,p_itens:catalogoCarrinho});
  if(r.error||!r.data?.sucesso){btn.disabled=false;btn.textContent='Confirmar pedido e enviar no WhatsApp';catalogoToast(r.error?.message||'Não foi possível concluir o pedido.',true);return}
  const linhas=(r.data.itens||[]).map(i=>'- '+i.nome+' x'+i.quantidade+' — '+catalogoMoney(i.valor)).join('\n'),txt='Olá! Quero confirmar meu pedido na sua loja.\n\nPedido #'+r.data.pedido_id+'\nCliente: '+cliente+'\nWhatsApp: '+telefone+'\n\n'+linhas+'\n\nTotal: '+catalogoMoney(r.data.total)+'\nStatus: Pendente',num=String(r.data.whatsapp||'').replace(/\D/g,'');
- catalogoCarrinho=[];catalogoSave();catalogoCount();catalogoFechar();catalogoToast('Pedido #'+r.data.pedido_id+' registrado! Abrindo o WhatsApp...');if(num)location.href='https://wa.me/'+num+'?text='+encodeURIComponent(txt);
+ catalogoCarrinho=[];catalogoSave();catalogoCount();catalogoFechar();if(num){catalogoToast('Pedido #'+r.data.pedido_id+' registrado! Abrindo o WhatsApp...');location.href='https://wa.me/'+num+'?text='+encodeURIComponent(txt)}else{catalogoToast('Pedido #'+r.data.pedido_id+' registrado, mas a loja ainda não configurou o WhatsApp.',true)}
 }
 function catalogoRender(){
  const root=document.getElementById('catalogoApp'),nome=catalogoLoja.catalogo_nome||catalogoLoja.nome||'Minha Loja',slogan=catalogoLoja.catalogo_slogan||'Peças feitas à mão com muito carinho, qualidade e o toque especial do crochê.',banner=catalogoLoja.catalogo_banner||'',prod=catalogoProdutos.filter(p=>p.mostrar_catalogo),max=Math.max(200,...prod.map(p=>Number(p.preco||0)));
