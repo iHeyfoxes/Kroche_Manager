@@ -60,8 +60,8 @@ async function catalogoFinalizar(ev){
  ev.preventDefault();const fd=new FormData(ev.target),cliente=String(fd.get('cliente')||'').trim(),telefone=String(fd.get('telefone')||'').trim(),btn=ev.target.querySelector('button[type=submit]');btn.disabled=true;btn.textContent='Processando pedido...';
  const r=await supabaseClient.rpc('finalizar_pedido_catalogo',{p_slug:catalogoSlug,p_cliente:cliente,p_telefone:telefone,p_itens:catalogoCarrinho});
  if(r.error||!r.data?.sucesso){btn.disabled=false;btn.textContent='Confirmar pedido e enviar no WhatsApp';catalogoToast(r.error?.message||'Não foi possível concluir o pedido.',true);return}
- const linhas=(r.data.itens||[]).map(i=>'- '+i.nome+' ('+i.quantidade+' un.)').join('\n'),txt='Olá! Quero confirmar um pedido na sua loja.\n\nCliente: '+cliente+'\nWhatsApp: '+telefone+'\n\n'+linhas+'\n\nTotal: '+catalogoMoney(r.data.total)+'\nStatus: Pendente',num=String(r.data.whatsapp||'').replace(/\D/g,'');
- catalogoCarrinho=[];catalogoSave();catalogoCount();catalogoFechar();catalogoToast('Pedido registrado! Abrindo o WhatsApp...');if(num)location.href='https://wa.me/'+num+'?text='+encodeURIComponent(txt);
+ const linhas=(r.data.itens||[]).map(i=>'- '+i.nome+' x'+i.quantidade+' — '+catalogoMoney(i.valor)).join('\n'),txt='Olá! Quero confirmar meu pedido na sua loja.\n\nPedido #'+r.data.pedido_id+'\nCliente: '+cliente+'\nWhatsApp: '+telefone+'\n\n'+linhas+'\n\nTotal: '+catalogoMoney(r.data.total)+'\nStatus: Pendente',num=String(r.data.whatsapp||'').replace(/\D/g,'');
+ catalogoCarrinho=[];catalogoSave();catalogoCount();catalogoFechar();catalogoToast('Pedido #'+r.data.pedido_id+' registrado! Abrindo o WhatsApp...');if(num)location.href='https://wa.me/'+num+'?text='+encodeURIComponent(txt);
 }
 function catalogoRender(){
  const root=document.getElementById('catalogoApp'),nome=catalogoLoja.catalogo_nome||catalogoLoja.nome||'Minha Loja',slogan=catalogoLoja.catalogo_slogan||'Peças feitas à mão com muito carinho, qualidade e o toque especial do crochê.',banner=catalogoLoja.catalogo_banner||'',prod=catalogoProdutos.filter(p=>p.mostrar_catalogo),max=Math.max(200,...prod.map(p=>Number(p.preco||0)));
