@@ -19,14 +19,17 @@ async function initRelatorios(){
     const r=range();
     let vq=supabaseClient.from('vendas').select('*').eq('user_id',u.id).order('data',{ascending:false});
     let cq=supabaseClient.from('compras').select('*').eq('user_id',u.id).order('data',{ascending:false});
-    if(r.start){vq=vq.gte('data',r.start).lte('data',r.end);cq=cq.gte('data',r.start).lte('data',r.end);}
-    const [vr,cr]=await Promise.all([vq,cq]);
+    let pq=supabaseClient.from('pedidos_catalogo').select('*').eq('usuario_id',u.id).neq('status','Cancelado').order('data',{ascending:false});
+    if(r.start){vq=vq.gte('data',r.start).lte('data',r.end);cq=cq.gte('data',r.start).lte('data',r.end);pq=pq.gte('data',r.start).lte('data',r.end);}
+    const [vr,cr,pr]=await Promise.all([vq,cq,pq]);
     if(vr.error){msg(vr.error.message,false);return}
     if(cr.error){msg(cr.error.message,false);return}
+    if(pr.error){msg(pr.error.message,false);return}
     const vendas=(vr.data||[]).map(x=>({tipo:'Venda',data:x.data,descricao:x.produto||'Venda',pessoa:x.cliente||'-',valor:Number(x.valor||0)}));
+    const catalogoVendas=(pr.data||[]).map(x=>({tipo:'Venda catálogo',data:x.data,descricao:'Pedido #'+x.id,pessoa:x.cliente||'-',valor:Number(x.total||0)}));
     const compras=(cr.data||[]).map(x=>({tipo:'Compra',data:x.data,descricao:x.material||'Compra',pessoa:x.fornecedor||'-',valor:Number(x.valor||0)}));
-    rows=[...vendas,...compras].sort((a,b)=>new Date(b.data||0)-new Date(a.data||0));
-    const totalV=vendas.reduce((a,x)=>a+x.valor,0),totalC=compras.reduce((a,x)=>a+x.valor,0);
+    rows=[...vendas,...catalogoVendas,...compras].sort((a,b)=>new Date(b.data||0)-new Date(a.data||0));
+    const totalV=[...vendas,...catalogoVendas].reduce((a,x)=>a+x.valor,0),totalC=compras.reduce((a,x)=>a+x.valor,0);
     document.getElementById('stats').innerHTML=`<div class="card"><div class="muted">Vendas no período</div><div class="stat">${money(totalV)}</div><small>${vendas.length} venda(s)</small></div><div class="card"><div class="muted">Despesas no período</div><div class="stat">${money(totalC)}</div><small>${compras.length} compra(s)</small></div><div class="card"><div class="muted">Lucro simplificado</div><div class="stat">${money(totalV-totalC)}</div><small>Vendas menos compras</small></div>`;
     document.getElementById('list').innerHTML=rows.map(x=>`<tr><td><span class="pill ${x.tipo==='Venda'?'success':'danger'}">${x.tipo}</span></td><td>${x.data?new Date(x.data).toLocaleDateString('pt-BR'):'-'}</td><td>${esc(x.descricao)}</td><td>${esc(x.pessoa)}</td><td>${money(x.valor)}</td></tr>`).join('')||'<tr><td colspan="5" class="muted">Nenhuma movimentação no período.</td></tr>';
   }
