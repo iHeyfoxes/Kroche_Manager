@@ -1,16 +1,34 @@
-/* Tema claro/escuro — a preferência local é a fonte de verdade entre as telas. */
-function getSavedTheme(){const saved=localStorage.getItem('kroche_theme');return saved==='escuro'?'escuro':'claro'}
-function applyTheme(theme,persist=true){const t=theme==='escuro'?'escuro':'claro';document.documentElement.setAttribute('data-theme',t);document.body?.classList.toggle('dark',t==='escuro');if(persist)localStorage.setItem('kroche_theme',t)}
-function renderThemeButton(theme){const b=document.getElementById('themeToggle');if(b)b.innerHTML=theme==='escuro'?'☀️ <span>Modo Claro</span>':'🌙 <span>Modo Escuro</span>'}
-async function toggleTheme(){
+/* Tema claro/escuro compartilhado do painel. */
+function getSavedTheme(){return localStorage.getItem('kroche_theme')||'claro'}
+
+function applyTheme(theme,persist=true){
+  const t=theme==='escuro'?'escuro':'claro';
+  document.documentElement.setAttribute('data-theme',t);
+  document.body?.classList.toggle('dark',t==='escuro');
+  if(persist)try{localStorage.setItem('kroche_theme',t)}catch{}
+}
+
+function renderThemeButton(theme){
+  const b=document.getElementById('themeToggle');
+  if(!b)return;
+  const escuro=theme==='escuro';
+  b.innerHTML=escuro
+    ? '<span class="theme-icon" aria-hidden="true">☀️</span><span>Modo claro</span>'
+    : '<span class="theme-icon" aria-hidden="true">🌙</span><span>Modo escuro</span>';
+  b.setAttribute('aria-label',escuro?'Ativar modo claro':'Ativar modo escuro');
+  b.setAttribute('aria-pressed',escuro?'true':'false');
+}
+
+function toggleTheme(){
   const next=getSavedTheme()==='escuro'?'claro':'escuro';
   applyTheme(next,true);
   renderThemeButton(next);
-  try{
-    const u=await user();
-    if(!u)return;
-    const {error}=await supabaseClient.from('usuarios').update({tema:next}).eq('id',u.id);
-    if(error)console.warn('Não foi possível sincronizar o tema no perfil:',error.message);
-    if(typeof _profileCache==='object'&&_profileCache)_profileCache.tema=next;
-  }catch(error){console.warn('Não foi possível sincronizar o tema:',error?.message||error)}
+  if(typeof user==='function'&&typeof supabaseClient!=='undefined'){
+    user().then(u=>{
+      if(!u)return;
+      supabaseClient.from('usuarios').update({tema:next}).eq('id',u.id)
+        .then(({error})=>{if(error)console.warn('Não foi possível salvar o tema:',error.message)})
+        .catch(error=>console.warn('Não foi possível salvar o tema:',error));
+    }).catch(()=>{});
+  }
 }
