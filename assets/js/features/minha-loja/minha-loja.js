@@ -44,7 +44,7 @@ async function initMinhaLoja(edit=false){
       document.getElementById('categoriaForm').onsubmit=async e=>{e.preventDefault();const nome=String(new FormData(e.target).get('nome')).trim();const slug=nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');const r=await supabaseClient.from('categorias_produtos').insert({usuario_id:u.id,nome,slug});if(r.error)msg(r.error.code==='23505'?'Essa categoria já existe.':r.error.message,false);else{msg('Categoria criada!');e.target.reset();cat.load()}};
       return;
     }
-    panel.innerHTML='<div class="card"><div class="panel-heading"><div><span class="panel-kicker">CONFIGURAÇÕES</span><h3>Dados da loja</h3></div></div><div class="settings-grid"><div><b>Nome</b><span>'+esc(p.catalogo_nome||p.nome)+'</span></div><div><b>Slug público</b><span>'+esc(p.slug)+'</span></div><div><b>WhatsApp</b><span>'+esc(p.whatsapp||'Não configurado')+'</span></div></div><div class="actions"><a class="btn btn-secondary" href="minha-loja-editar.html">Editar aparência e WhatsApp</a></div></div>';
+    panel.innerHTML='<div class="card"><div class="panel-heading"><div><span class="panel-kicker">CONFIGURAÇÕES</span><h3>Dados da loja</h3></div></div><div class="settings-grid"><div><b>Nome</b><span>'+esc(p.catalogo_nome||p.nome)+'</span></div><div><b>Slug público</b><span>'+esc(p.slug)+'</span></div><div><b>WhatsApp</b><span>'+esc(p.whatsapp||'Não configurado')+'</span></div><div><b>Exibição de estoque</b><span>'+ (p.mostrar_estoque!==false?'Ativa':'Oculta') +'</span></div></div></div>';
   }
   document.querySelectorAll('.store-tab').forEach(b=>b.onclick=()=>renderTab(b.dataset.tab));
   await renderTab('produtos');
