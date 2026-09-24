@@ -52,7 +52,7 @@ async function layout(){
 async function shell(title){
   const cachedTheme=getSavedTheme();applyTheme(cachedTheme,false);
   const p=await profile();if(!p){msg('Não foi possível carregar seu perfil. Recarregue a página.',false);return null}
-  const theme=p.tema||cachedTheme;applyTheme(theme);
+  const localTheme=localStorage.getItem('kroche_theme');const theme=localTheme==='escuro'||localTheme==='claro'?localTheme:(p.tema==='escuro'?'escuro':'claro');applyTheme(theme,true);
   const name=document.getElementById('userName'),titleEl=document.getElementById('pageTitle');
   if(name)name.textContent=p.nome||'Usuário';if(titleEl)titleEl.textContent=title;
   nav();renderThemeButton(theme);return p;
