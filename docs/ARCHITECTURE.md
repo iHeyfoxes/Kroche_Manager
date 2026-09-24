@@ -145,4 +145,26 @@ O objetivo é que outro desenvolvedor consiga entender onde está a tela, onde e
 
 ## Pedidos do catálogo
 
-O checkout público usa `pedidos_catalogo` como cabeçalho e `pedido_itens` para os itens. A função `finalizar_pedido_catalogo` valida o estoque com bloqueio de linha (`FOR UPDATE`), cria o pedido, baixa o estoque e cria a encomenda administrativa em uma única transação. O cliente recebe um resumo do pedido para enviar ao WhatsApp da loja. O cancelamento administrativo usa `cancelar_pedido_catalogo` para devolver as quantidades ao estoque. Não deve ser implementada baixa de estoque no JavaScript: a regra de concorrência fica no banco.
+O checkout público usa `pedidos_catalogo` como cabeçalho e `pedido_itens` para os itens. A função `finalizar_pedido_catalogo` valida o estoque com bloqueio de linha (`FOR UPDATE`), cria o pedido, baixa o estoque e cria a encomenda administrativa em uma única transação. O cliente recebe um resumo do pedido para enviar ao WhatsApp da loja.
+
+Pedidos do catálogo são acompanhados em **Encomendas**. A edição de uma encomenda do catálogo mantém o status sincronizado com o pedido. Cancelamentos usam `cancelar_pedido_catalogo` para devolver as quantidades ao estoque.
+
+A baixa de estoque não deve ser implementada no JavaScript: a regra de concorrência e integridade fica no banco.
+
+## Compras e estoque
+
+As compras registradas no painel devem alimentar o estoque de materiais através das funções/migrations do banco responsáveis pela integração. A tela **Estoque** continua sendo a fonte visual para acompanhar quantidade, estoque mínimo, custo unitário e alertas de reposição.
+
+## Regra para novos desenvolvedores
+
+Para alterar uma funcionalidade:
+
+1. encontre a tela;
+2. encontre o módulo em "features/";
+3. identifique as consultas Supabase;
+4. reutilize "core/" quando possível;
+5. altere somente a camada necessária;
+6. valide o fluxo completo;
+7. documente alterações estruturais do banco.
+
+O objetivo é que outro desenvolvedor consiga entender onde está a tela, onde está a regra, onde está o banco e onde está o estilo sem precisar procurar lógica espalhada pelo projeto.
