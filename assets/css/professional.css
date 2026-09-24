@@ -126,3 +126,8 @@ body.dark{background:#161210;color:#f7f2ed}
 .dark .settings-grid div{background:#2b211d;border-color:#44342c}.dark .pill{background:#382b26;color:#e8ddd6}.dark .pill.success{background:#294332;color:#b9ddc1}.dark .pill.danger{background:#4a2926;color:#f1b2ab}
 .dark .modern-hero{background:linear-gradient(135deg,#251d1a,#342821)}
 .dark .table th{background:#382b26}.dark .table td{border-color:#3b2d27}.dark .empty-state-small{color:#b9aaa0}
+
+/* Zona de perigo — conta */
+.danger-zone{margin-top:20px;border:1px solid rgba(184,93,84,.28);background:linear-gradient(180deg,rgba(184,93,84,.06),rgba(184,93,84,.025));}
+.danger-zone h3{margin:6px 0 8px;color:var(--km-red,#b85d54)}
+.danger-zone .panel-kicker{color:var(--km-red,#b85d54)}
