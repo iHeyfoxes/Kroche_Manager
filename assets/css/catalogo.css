@@ -1,4 +1,4 @@
-:root{--catalogo-cor:var(--catalogo-cor);--catalogo-botao:var(--catalogo-cor);--cafe:#321c13;--texto:#2f2926;--muted:#756c67;--fundo:#fbfaf8;--linha:#e9e3df;--card:#fff;--verde:#28a96b}
+:root{--catalogo-cor:#5f4537;--catalogo-botao:#c28f62;--catalogo-fundo:#fbfaf8;--cafe:#321c13;--texto:#2f2926;--muted:#756c67;--fundo:#fbfaf8;--linha:#e9e3df;--card:#fff;--verde:#28a96b}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--catalogo-fundo);color:var(--texto);font-family:Inter,"Segoe UI",Arial,sans-serif;-webkit-font-smoothing:antialiased}body.modal-aberto{overflow:hidden}a{text-decoration:none;color:inherit}button,input,select{font:inherit}button{cursor:pointer}.catalogo-wrap{min-height:100vh}
 .catalogo-topbar{height:74px;background:linear-gradient(90deg,#2d170f,#432519);color:#fff;box-shadow:0 2px 12px #1b0e0a33;position:sticky;top:0;z-index:20}
 .catalogo-topbar-inner{height:100%;width:100%;margin:auto;padding:0 34px;display:flex;align-items:center;gap:42px}
