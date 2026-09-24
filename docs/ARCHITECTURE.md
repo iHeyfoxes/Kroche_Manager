@@ -173,3 +173,25 @@ O objetivo é que outro desenvolvedor consiga entender onde está a tela, onde e
 ## Exclusão de conta
 
 A exclusão definitiva da conta é feita pela Edge Function `excluir-conta`, nunca pelo navegador com uma chave privilegiada. A função exige JWT de usuário, remove arquivos do usuário nos buckets usados pelo sistema e chama a API administrativa do Supabase Auth para excluir o usuário. O frontend apenas invoca a função autenticada e encerra a sessão após sucesso.
+
+
+## Pedidos do catálogo
+
+O checkout público usa o fluxo transacional do banco para registrar um pedido em `pedidos_catalogo`, seus itens em `pedido_itens` e a encomenda administrativa correspondente.
+
+Fluxo:
+
+```text
+Catálogo → Carrinho → finalizar_pedido_catalogo()
+                         ├─ valida produtos e quantidades
+                         ├─ bloqueia produtos com FOR UPDATE
+                         ├─ baixa o estoque
+                         ├─ cria pedido + itens
+                         └─ cria a encomenda administrativa
+                                  ↓
+                               WhatsApp
+```
+
+O cancelamento administrativo usa `cancelar_pedido_catalogo()`, devolvendo as quantidades ao estoque e sincronizando o status da encomenda. As estruturas e funções de checkout já existem no banco Supabase por migrations aplicadas anteriormente; novas alterações devem usar migrations versionadas e não recriar essas estruturas.
+
+O frontend envia ao WhatsApp o número do pedido, cliente, telefone, itens, quantidades, valores e total. A baixa de estoque acontece no banco antes do redirecionamento para o WhatsApp.
