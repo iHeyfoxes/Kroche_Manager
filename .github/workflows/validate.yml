@@ -32,3 +32,15 @@ jobs:
             echo "Found references to removed screens/modules."
             exit 1
           fi
+
+      - name: Check shared panel styling
+        shell: bash
+        run: |
+          set -e
+          pages="dashboard.html vendas.html compras.html receitas.html encomendas.html leads.html relatorios.html calculadora.html ajuda.html perfil.html estoque.html minha-loja.html minha-loja-editar.html editar-venda.html editar-encomenda.html"
+          for page in $pages; do
+            if ! grep -q 'assets/css/professional.css' "$page"; then
+              echo "Missing professional.css in $page"
+              exit 1
+            fi
+          done
