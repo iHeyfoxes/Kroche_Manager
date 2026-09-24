@@ -168,3 +168,8 @@ Para alterar uma funcionalidade:
 7. documente alterações estruturais do banco.
 
 O objetivo é que outro desenvolvedor consiga entender onde está a tela, onde está a regra, onde está o banco e onde está o estilo sem precisar procurar lógica espalhada pelo projeto.
+
+
+## Exclusão de conta
+
+A exclusão definitiva da conta é feita pela Edge Function `excluir-conta`, nunca pelo navegador com uma chave privilegiada. A função exige JWT de usuário, remove arquivos do usuário nos buckets usados pelo sistema e chama a API administrativa do Supabase Auth para excluir o usuário. O frontend apenas invoca a função autenticada e encerra a sessão após sucesso.
