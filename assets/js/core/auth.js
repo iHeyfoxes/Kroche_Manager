@@ -65,6 +65,7 @@ async function fazerCadastro({ nome, nicho, email, senha, confirmarSenha, termos
         email: email.trim(),
         password: senha,
         options: {
+            emailRedirectTo: `${window.location.origin}/login.html`,
             data: {
                 nome: nome.trim(),
                 nicho: nicho,
