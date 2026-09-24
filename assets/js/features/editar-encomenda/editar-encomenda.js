@@ -17,6 +17,7 @@ async function initEditEncomenda(){
       if(r.error||!r.data?.sucesso){msg(r.error?.message||'Não foi possível cancelar o pedido.',false);return}
       location.href='encomendas.html';return;
     }
+    if(catalogo&&data.status==='Cancelado'&&status!=='Cancelado'){msg('Um pedido cancelado não pode ser reaberto. Crie um novo pedido.',false);return}
     if(catalogo){
       const {error:pedidoError}=await supabaseClient.from('pedidos_catalogo').update({cliente:f.get('cliente'),telefone:f.get('telefone'),total:+f.get('valor'),status,atualizado_em:new Date().toISOString()}).eq('id',data.pedido_catalogo_id).eq('usuario_id',u.id);
       if(pedidoError){msg(pedidoError.message,false);return}
