@@ -32,9 +32,11 @@ create index if not exists pedidos_catalogo_usuario_status_idx on public.pedidos
 create index if not exists pedido_itens_pedido_idx on public.pedido_itens(pedido_id);
 create index if not exists pedido_itens_produto_idx on public.pedido_itens(produto_id);
 
+drop index if exists public.encomendas_pedido_catalogo_uidx;
 create unique index if not exists encomendas_pedido_catalogo_uidx
   on public.encomendas(pedido_catalogo_id);
 
+drop index if exists public.vendas_encomenda_id_uidx;
 create unique index if not exists vendas_encomenda_id_uidx
   on public.vendas(encomenda_id);
 
