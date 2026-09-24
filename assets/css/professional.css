@@ -131,3 +131,38 @@ body.dark{background:#161210;color:#f7f2ed}
 .danger-zone{margin-top:20px;border:1px solid rgba(184,93,84,.28);background:linear-gradient(180deg,rgba(184,93,84,.06),rgba(184,93,84,.025));}
 .danger-zone h3{margin:6px 0 8px;color:var(--km-red,#b85d54)}
 .danger-zone .panel-kicker{color:var(--km-red,#b85d54)}
+
+
+/* ===== Navegação lateral + tema ===== */
+.sidebar-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sidebar-head .brand{min-width:0}
+.sidebar-close{display:none;border:0;background:transparent;color:var(--km-muted);font-size:28px;line-height:1;width:38px;height:38px;border-radius:10px;cursor:pointer}
+.sidebar-close:hover{background:#eadfd5;color:var(--km-primary)}
+.sidebar-tools{padding:8px 6px 12px}
+#themeToggle{width:100%;justify-content:flex-start;padding:10px 12px;gap:10px}
+#themeToggle .theme-icon{width:28px;height:28px;display:grid;place-items:center;border-radius:9px;background:rgba(95,69,55,.08);font-size:15px;flex:0 0 28px}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav-section-title{margin-top:7px}
+.nav a{display:flex;align-items:center;gap:10px;min-height:42px;text-decoration:none}
+.nav a .nav-icon{width:28px;height:28px;display:grid;place-items:center;flex:0 0 28px;border-radius:9px;background:rgba(95,69,55,.07);font-size:15px;line-height:1}
+.nav a span:last-child{min-width:0}
+.nav a.active .nav-icon{background:rgba(255,255,255,.16)}
+.nav a.nav-logout{margin-top:10px;border-top:1px solid var(--km-line);border-radius:0;padding-top:15px;color:#8a5b54}
+.nav a.nav-logout .nav-icon{background:#fae7e5;color:#a34e47}
+html[data-theme="escuro"] .sidebar,body.dark .sidebar{background:linear-gradient(180deg,#211a17 0%,#171311 100%);border-color:#3b2d27}
+html[data-theme="escuro"] .nav a,body.dark .nav a{color:#d2c4ba}
+html[data-theme="escuro"] .nav a:hover,body.dark .nav a:hover{background:#2f241f;border-color:#49372e}
+html[data-theme="escuro"] .nav a .nav-icon,body.dark .nav a .nav-icon{background:#382b26}
+html[data-theme="escuro"] .nav a.active,body.dark .nav a.active{background:linear-gradient(135deg,#76553f,#5b4031);color:#fff}
+html[data-theme="escuro"] .nav a.nav-logout,body.dark .nav a.nav-logout{border-color:#3b2d27;color:#e0aaa3}
+html[data-theme="escuro"] #themeToggle .theme-icon,body.dark #themeToggle .theme-icon{background:#49372e}
+html[data-theme="escuro"] .sidebar-close,body.dark .sidebar-close{color:#d2c4ba}
+html[data-theme="escuro"] .sidebar-close:hover,body.dark .sidebar-close:hover{background:#382b26;color:#fff}
+@media(max-width:800px){
+  .sidebar-head{margin-bottom:4px}
+  .sidebar-close{display:grid;place-items:center}
+  .sidebar{padding:14px 12px}
+  .nav a{min-height:44px;padding:10px 11px}
+  .nav a .nav-icon{width:30px;height:30px;flex-basis:30px}
+  .sidebar.open{transform:translateX(0);z-index:100}
+}

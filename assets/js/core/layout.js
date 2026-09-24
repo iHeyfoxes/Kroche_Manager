@@ -1,37 +1,45 @@
 /* Estrutura visual compartilhada do painel. */
 function nav(){
   const el=document.getElementById('appnav');if(!el)return;
-  el.innerHTML=`
-    <div class="nav-section-title">Visão geral</div>
-    <a href="dashboard.html">⌂ <span>Dashboard</span></a>
-    <div class="nav-section-title">Operação</div>
-    <a href="vendas.html">↗ <span>Vendas</span></a>
-    <a href="compras.html">🛒 <span>Compras</span></a>
-    <a href="encomendas.html">▣ <span>Encomendas</span></a>
-    <a href="estoque.html">▤ <span>Estoque</span></a>
-    <a href="receitas.html">▧ <span>Receitas</span></a>
-    <div class="nav-section-title">Relacionamento</div>
-    <a href="leads.html">♧ <span>Leads</span></a>
-    <div class="nav-section-title">Minha loja</div>
-    <a href="minha-loja.html">⌂ <span>Minha Loja</span></a>
-    <a href="relatorios.html">▥ <span>Relatórios</span></a>
-    <a href="calculadora.html">⌗ <span>Calculadora</span></a>
-    <div class="nav-section-title">Sistema</div>
-    <a href="ajuda.html">? <span>Ajuda</span></a>
-    <a href="perfil.html">⚙ <span>Meu Perfil</span></a>
-    <a href="#" id="logoutLink">↪ <span>Sair</span></a>`;
-  const active=location.pathname.split('/').pop();
-  el.querySelectorAll('a[href]').forEach(a=>{if(a.getAttribute('href')===active)a.classList.add('active')});
-  document.getElementById('logoutLink').onclick=e=>{e.preventDefault();fazerLogout()};
-  el.querySelectorAll('a:not(#logoutLink)').forEach(a=>a.addEventListener('click',closeMenu));
+  const items=[
+    ['Visão geral',[
+      ['dashboard.html','⌂','Dashboard']
+    ]],
+    ['Operação',[
+      ['vendas.html','↗','Vendas'],['compras.html','🛒','Compras'],['encomendas.html','▣','Encomendas'],
+      ['estoque.html','▤','Estoque'],['receitas.html','▧','Receitas']
+    ]],
+    ['Relacionamento',[
+      ['leads.html','♧','Leads']
+    ]],
+    ['Minha loja',[
+      ['minha-loja.html','⌂','Minha Loja'],['relatorios.html','▥','Relatórios'],['calculadora.html','⌗','Calculadora']
+    ]],
+    ['Sistema',[
+      ['ajuda.html','?','Ajuda'],['perfil.html','⚙','Meu Perfil']
+    ]]
+  ];
+  el.innerHTML=items.map(([section,links])=>'<div class="nav-section-title">'+section+'</div>'+
+    links.map(([href,icon,label])=>'<a href="'+href+'"><span class="nav-icon" aria-hidden="true">'+icon+'</span><span>'+label+'</span></a>').join('')
+  ).join('')+
+  '<a href="#" id="logoutLink" class="nav-logout"><span class="nav-icon" aria-hidden="true">↪</span><span>Sair</span></a>';
+
+  const active=location.pathname.split('/').pop()||'dashboard.html';
+  el.querySelectorAll('a[href]').forEach(a=>{
+    if(a.getAttribute('href')===active)a.classList.add('active');
+    a.addEventListener('click',closeMenu);
+  });
+  const logout=document.getElementById('logoutLink');
+  if(logout)logout.onclick=e=>{e.preventDefault();fazerLogout()};
 }
+
 async function layout(){
   applyTheme(getSavedTheme(),false);
   document.body.innerHTML=`
     <div class="overlay-menu" id="menuOverlay"></div>
     <div class="app">
       <aside class="sidebar" id="sidebar">
-        <div class="brand"><span class="brand-icon">🧶</span><span>Kroche <b>Manager</b></span></div>
+        <div class="sidebar-head"><div class="brand"><span class="brand-icon">🧶</span><span>Kroche <b>Manager</b></span></div><button class="sidebar-close" id="sidebarClose" aria-label="Fechar menu">×</button></div>
         <div class="sidebar-caption">GESTÃO DO ATELIÊ</div>
         <div class="sidebar-tools"><button class="btn btn-secondary" id="themeToggle" style="width:100%;">◐ <span>Modo Escuro</span></button></div>
         <nav class="nav" id="appnav"></nav>
@@ -46,7 +54,7 @@ async function layout(){
       </main>
     </div>`;
   document.getElementById('menuToggle').onclick=()=>{document.getElementById('sidebar').classList.add('open');document.getElementById('menuOverlay').classList.add('open')};
-  document.getElementById('menuOverlay').onclick=closeMenu;
+  document.getElementById('menuOverlay').onclick=closeMenu;document.getElementById('sidebarClose').onclick=closeMenu;
   document.getElementById('themeToggle').onclick=toggleTheme;
 }
 async function shell(title){
