@@ -21,7 +21,7 @@
       'dashboard.html':()=>initDashboard(),'vendas.html':()=>initVendas(),'compras.html':()=>initCompras(),
       'receitas.html':()=>initReceitas(),'encomendas.html':()=>initEncomendas(),'leads.html':()=>initLeads(),
       'relatorios.html':()=>initRelatorios(),'calculadora.html':()=>initCalculadora(),'ajuda.html':()=>initAjuda(),
-      'minha-loja.html':()=>initMinhaLoja(false),'minha-loja-editar.html':()=>initMinhaLoja(true),
+      'minha-loja.html':()=>initMinhaLoja(false),
       'perfil.html':()=>initPerfil(),'editar-venda.html':()=>initEditVenda(),'editar-encomenda.html':()=>initEditEncomenda(),
       'estoque.html':()=>initEstoque()
     };
