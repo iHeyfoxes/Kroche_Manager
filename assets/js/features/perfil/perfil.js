@@ -34,7 +34,7 @@ async function initPerfil(){
   </div>`;
 
   const fi=document.querySelector('[name=foto]');
-  fi.onchange=()=>{
+  document.getElementById('deleteAccount').onclick=async()=>{if(!confirm('Tem certeza que deseja excluir sua conta? Todos os dados associados serão removidos e essa ação não pode ser desfeita.'))return;const b=document.getElementById('deleteAccount');b.disabled=true;b.textContent='Excluindo conta...';try{const session=await supabaseClient.auth.getSession();const token=session.data.session?.access_token;if(!token)throw new Error('Sua sessão expirou. Faça login novamente.');const r=await fetch('https://tjmemwlavrsdclvtgtcs.supabase.co/functions/v1/excluir-conta',{method:'POST',headers:{Authorization:'Bearer '+token}});const body=await r.json().catch(()=>({}));if(!r.ok||!body.success)throw new Error(body.error||'Não foi possível excluir a conta.');await supabaseClient.auth.signOut();location.href='login.html'}catch(error){msg(error?.message||'Não foi possível excluir a conta.',false);b.disabled=false;b.textContent='Excluir minha conta'}};fi.onchange=()=>{
     const f=fi.files?.[0],img=document.getElementById('perfilPreview');
     if(!f)return;
     if(!['image/jpeg','image/png','image/webp'].includes(f.type)||f.size>5*1024*1024){
