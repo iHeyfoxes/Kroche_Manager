@@ -21,3 +21,8 @@ A finalização usa função PostgreSQL `SECURITY DEFINER` com `search_path` vaz
 ## Histórico
 
 O preço e o nome são copiados para `pedido_itens`, então alterações futuras no cadastro do produto não alteram o histórico do pedido.
+
+
+## Proteção contra alterações indevidas
+
+Produtos com pedidos ativos possuem proteção no banco para impedir alteração manual da quantidade reservada ou exclusão do produto até que o pedido seja resolvido.
