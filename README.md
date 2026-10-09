@@ -1,79 +1,78 @@
-# Kroche Manager
+# Kroche Manager — Versão Next.js
 
-Sistema de gestão para artesãs, com autenticação Supabase, gestão de clientes, produtos, materiais/estoque, encomendas, vendas, receitas e catálogo público.
+Este projeto é a migração completa do **Kroche Manager** para **Next.js 16 (App Router)** com **TypeScript**, **React 19** e integração direta com o **Supabase**.
 
-## Estado atual
+---
 
-A base do projeto já está integrada ao Supabase e o fluxo de autenticação inclui:
+## 🚀 Como executar localmente
 
-- Cadastro e login com Supabase Auth
-- Login com Google
-- Recuperação e redefinição de senha
-- Logout
-- Perfil/loja vinculado ao usuário autenticado
-- Row Level Security (RLS) para separar os dados de cada loja
-- Catálogo público de produtos
-- Estrutura para leads vindos do catálogo
-- Storage para fotos de perfil, produtos e banners
-
-O banco também recebeu ajustes de segurança e desempenho, incluindo políticas RLS mais eficientes, permissões mais restritas para operações autenticadas e índices para chaves estrangeiras.
-
-## Estrutura principal
-
-- `supabase/schema.sql` — estrutura inicial do banco e políticas RLS
-- `assets/js/` — lógica JavaScript do sistema e integração com Supabase
-- páginas HTML — interface do sistema
-
-## Supabase
-
-O projeto usa o Supabase para:
-
-- autenticação;
-- banco PostgreSQL;
-- Row Level Security;
-- armazenamento de imagens;
-- operações do catálogo público.
-
-A chave pública do Supabase deve ser configurada no arquivo de configuração do frontend. **Nunca coloque chaves secretas, service role keys ou credenciais privadas no repositório.**
-
-## Desenvolvimento local
-
-Como o frontend é estático, pode ser executado com um servidor local simples:
-
+1. Entre na pasta do projeto:
 ```bash
-python -m http.server 8000
+cd kroche-next
 ```
 
-Depois, abra:
+2. Instale as dependências (já instaladas):
+```bash
+npm install
+```
 
+3. Inicie o servidor de desenvolvimento:
+```bash
+npm run dev
+```
+
+4. Abra no navegador:
 ```text
-http://localhost:8000/
+http://localhost:3000
 ```
 
-## Publicação
+---
 
-O projeto pode ser publicado em hospedagem estática, como GitHub Pages, desde que as configurações do Supabase e as URLs de redirecionamento do Auth estejam configuradas corretamente.
+## 🗂️ Estrutura das Rotas Migradas
 
-## Próximas etapas
+| Rota Next.js | Descrição |
+|---|---|
+| `/` | Redirecionamento inteligente / Apresentação |
+| `/login` | Autenticação por e-mail e Google OAuth |
+| `/cadastro` | Criação de conta com nicho artesanal e termos |
+| `/esqueci-senha` | Solicitação de link para recuperação de senha |
+| `/reset-senha` | Redefinição de nova senha |
+| `/dashboard` | Painel de controle, KPIs, extrato recente e gráficos |
+| `/vendas` | Cadastro de vendas e histórico com soma total |
+| `/vendas/[id]/editar` e `/editar-venda?id=...` | Edição de venda |
+| `/compras` | Cadastro de compras integradas ao estoque |
+| `/encomendas` | Gestão de encomendas manuais e vindas do catálogo |
+| `/encomendas/[id]/editar` e `/editar-encomenda?id=...` | Edição e cancelamento com reposição de estoque |
+| `/estoque` | Controle de insumos, materiais e alertas de reposição |
+| `/receitas` | Biblioteca de receitas de crochê com links de YouTube e PDF |
+| `/leads` | Gestão de contatos e pedidos do catálogo público |
+| `/minha-loja` | Central administrativa do catálogo (produtos, categorias e configurações) |
+| `/minha-loja/editar` e `/minha-loja-editar` | Personalização da loja (cores, banner, WhatsApp, etc.) |
+| `/relatorios` | Relatórios financeiros por período com exportação PDF e CSV |
+| `/calculadora` | Calculadora de precificação para peças de crochê |
+| `/ajuda` | Central de ajuda com guia de cada seção |
+| `/perfil` | Alteração de senha e foto de perfil no Supabase Storage |
+| `/loja/[slug]` | Catálogo público do ateliê com carrinho e checkout via WhatsApp |
+| `/termos-de-uso` | Termos de uso do sistema |
+| `/politica-de-privacidade` | Política de privacidade (LGPD) |
 
-Antes de considerar o sistema como versão final, ainda precisamos concluir e validar:
+---
 
-- testes completos de todos os CRUDs;
-- validação de login Google e recuperação de senha em produção;
-- revisão do catálogo e finalização do fluxo de pedido;
-- testes de upload e exclusão de imagens;
-- revisão de responsividade;
-- relatórios e indicadores, caso ainda existam telas incompletas;
-- revisão final das políticas e permissões do Supabase;
-- habilitação da proteção contra senhas vazadas no Supabase Auth;
-- testes finais de produção e documentação.
+## ⚙️ Variáveis de Ambiente (`.env.local`)
 
-## Segurança
+O arquivo `.env.local` já está configurado com as chaves públicas do Supabase:
 
-O frontend utiliza apenas credenciais públicas apropriadas para aplicações cliente. Operações administrativas e dados privados devem continuar protegidos por RLS e nunca devem depender de segredos expostos no navegador.
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://tjmemwlavrsdclvtgtcs.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
 
-## Projeto
+---
 
-Repositório: `iHeyfoxes/Kroche_Manager`
+## 🛠️ Tecnologias Utilizadas
 
-O projeto está sendo desenvolvido de forma incremental, priorizando segurança, funcionamento real dos fluxos e manutenção simples do código.
+- **Next.js 16 (App Router)**
+- **React 19 & TypeScript**
+- **Supabase JS Client** (Auth, Database Postgres com RLS e Storage)
+- **Vanilla CSS Tokens** (Paleta aconchegante artesanal, suporte a Modo Claro e Modo Escuro)
+- **jsPDF & jsPDF-autotable** (Exportação de relatórios financeiros)
