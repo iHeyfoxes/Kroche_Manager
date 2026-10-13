@@ -1,9 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
-import { Usuario } from '@/types/database';
+import { Usuario, UsuarioStatus } from '@/types/database';
 
 interface AuthContextType {
   user: User | null;
@@ -13,6 +13,17 @@ interface AuthContextType {
   toggleTheme: () => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<Usuario | null>;
+  // Propriedades e permissões de acesso
+  status: UsuarioStatus;
+  ativo: boolean;
+  masterAcess: boolean;
+  masteracess: boolean;
+  isApproved: boolean;
+  isPending: boolean;
+  isSuspended: boolean;
+  isActive: boolean;
+  isMaster: boolean;
+  canAccessSystem: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -23,6 +34,16 @@ const AuthContext = createContext<AuthContextType>({
   toggleTheme: async () => {},
   logout: async () => {},
   refreshProfile: async () => null,
+  status: 'pendente',
+  ativo: false,
+  masterAcess: false,
+  masteracess: false,
+  isApproved: false,
+  isPending: true,
+  isSuspended: false,
+  isActive: false,
+  isMaster: false,
+  canAccessSystem: false,
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -52,17 +73,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .maybeSingle();
 
       if (data) {
-        setProfile(data as Usuario);
+        const isMasterUser = Boolean(data.masteracess ?? data.masterAcess);
+        const normalized: Usuario = {
+          ...data,
+          status: (data.status as UsuarioStatus) || 'pendente',
+          ativo: data.ativo ?? true,
+          masteracess: isMasterUser,
+          masterAcess: isMasterUser,
+          email: data.email || currentUser?.email || null,
+        };
+
+        // Sincroniza email na tabela caso esteja ausente
+        if (!data.email && currentUser?.email) {
+          supabase.from('usuarios').update({ email: currentUser.email }).eq('id', userId).then();
+        }
+
+        setProfile(normalized);
         if (data.tema === 'escuro' || data.tema === 'claro') {
           applyTheme(data.tema);
         }
-        return data as Usuario;
+        return normalized;
       }
 
       // Fallback profile if record not yet created
       const fallback: Usuario = {
         id: userId,
         nome: currentUser?.user_metadata?.nome || currentUser?.email?.split('@')[0] || 'Usuário',
+        email: currentUser?.email || null,
         slug: 'loja',
         tema: 'claro',
         mostrar_preco: true,
@@ -70,7 +107,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         mostrar_tempo: true,
         aceitou_termos: true,
         aceitou_politica: true,
+        status: 'pendente',
+        ativo: true,
+        masteracess: false,
+        masterAcess: false,
       };
+
+      try {
+        const { data: inserted } = await supabase
+          .from('usuarios')
+          .insert({
+            id: fallback.id,
+            nome: fallback.nome,
+            email: fallback.email,
+            slug: (fallback.nome.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'loja') + '-' + userId.slice(0, 4),
+            tema: fallback.tema,
+            status: 'pendente',
+            ativo: true,
+            masteracess: false,
+          })
+          .select('*')
+          .maybeSingle();
+
+        if (inserted) {
+          const insertedNormalized: Usuario = {
+            ...inserted,
+            status: (inserted.status as UsuarioStatus) || 'pendente',
+            ativo: inserted.ativo ?? true,
+            masteracess: Boolean(inserted.masteracess ?? inserted.masterAcess),
+            masterAcess: Boolean(inserted.masteracess ?? inserted.masterAcess),
+            email: inserted.email || currentUser?.email || null,
+          };
+          setProfile(insertedNormalized);
+          return insertedNormalized;
+        }
+      } catch {
+        // Ignora erro se RLS impedir insert direto
+      }
+
       setProfile(fallback);
       return fallback;
     } catch (err) {
@@ -144,6 +218,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Avaliação de permissões e controle de acesso
+  const status: UsuarioStatus = (profile?.status as UsuarioStatus) || 'pendente';
+  const ativo: boolean = profile?.ativo ?? true;
+  const isMaster: boolean = Boolean(profile?.masteracess || profile?.masterAcess);
+  const isApproved: boolean = status === 'aprovado';
+  const isPending: boolean = status === 'pendente';
+  const isSuspended: boolean = status === 'suspenso';
+  const isActive: boolean = ativo !== false;
+  // O usuário pode acessar o sistema se estiver aprovado E ativo, ou se for Master
+  const canAccessSystem: boolean = (isApproved && isActive) || isMaster;
+
   return (
     <AuthContext.Provider
       value={{
@@ -154,6 +239,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         toggleTheme,
         logout,
         refreshProfile,
+        status,
+        ativo,
+        masterAcess: isMaster,
+        masteracess: isMaster,
+        isApproved,
+        isPending,
+        isSuspended,
+        isActive,
+        isMaster,
+        canAccessSystem,
       }}
     >
       {children}
@@ -164,3 +259,4 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   return useContext(AuthContext);
 }
+

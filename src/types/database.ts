@@ -1,6 +1,9 @@
+export type UsuarioStatus = 'aprovado' | 'suspenso' | 'pendente';
+
 export interface Usuario {
   id: string;
   nome: string;
+  email?: string | null;
   whatsapp?: string | null;
   slug: string;
   tema: string;
@@ -18,6 +21,10 @@ export interface Usuario {
   aceitou_politica: boolean;
   data_aceite_lgpd?: string;
   data?: string;
+  status?: UsuarioStatus | null;
+  ativo?: boolean | null;
+  masteracess?: boolean | null;
+  masterAcess?: boolean | null;
 }
 
 export interface Venda {

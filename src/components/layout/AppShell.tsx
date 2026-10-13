@@ -131,6 +131,19 @@ const Icons = {
       <line x1="4" x2="20" y1="18" y2="18" />
     </svg>
   ),
+  ShieldCheck: () => (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      <path d="m9 12 2 2 4-4" />
+    </svg>
+  ),
+  UsersCheck: () => (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="m17 11 2 2 4-4" />
+    </svg>
+  ),
   Close: () => (
     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <line x1="18" y1="6" x2="6" y2="18" />
@@ -153,11 +166,49 @@ interface AppShellProps {
 }
 
 export default function AppShell({ children, title }: AppShellProps) {
-  const { user, profile, loading, theme, toggleTheme, logout } = useAuth();
+  const {
+    user,
+    profile,
+    loading,
+    theme,
+    toggleTheme,
+    logout,
+    refreshProfile,
+    canAccessSystem,
+    isMaster,
+    isApproved,
+    isPending,
+    isSuspended,
+    isActive,
+    status,
+  } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [checkingApproval, setCheckingApproval] = useState(false);
+  const [checkMsg, setCheckMsg] = useState<{ tipo: 'info' | 'sucesso' | 'erro'; texto: string } | null>(null);
   const pathname = usePathname();
 
   const closeMenu = () => setSidebarOpen(false);
+
+  const handleCheckApproval = async () => {
+    setCheckingApproval(true);
+    setCheckMsg(null);
+    try {
+      const refreshed = await refreshProfile();
+      if (refreshed?.status === 'aprovado' && refreshed?.ativo !== false) {
+        setCheckMsg({ tipo: 'sucesso', texto: 'Parabéns! Sua conta foi aprovada! Liberando acesso...' });
+      } else if (refreshed?.status === 'suspenso') {
+        setCheckMsg({ tipo: 'erro', texto: 'Sua conta consta como suspensa. Fale com a administração.' });
+      } else if (refreshed?.ativo === false) {
+        setCheckMsg({ tipo: 'erro', texto: 'Sua conta está desativada no momento.' });
+      } else {
+        setCheckMsg({ tipo: 'info', texto: 'Seu cadastro ainda está em análise pendente. Aguarde a aprovação.' });
+      }
+    } catch {
+      setCheckMsg({ tipo: 'erro', texto: 'Não foi possível verificar no momento. Tente novamente.' });
+    } finally {
+      setCheckingApproval(false);
+    }
+  };
 
   const navLinks: Array<{
     section?: string;
@@ -167,6 +218,12 @@ export default function AppShell({ children, title }: AppShellProps) {
   }> = [
     { section: 'Visão Geral' },
     { href: '/dashboard', label: 'Dashboard', icon: Icons.Dashboard },
+    ...(isMaster
+      ? [
+          { section: 'Administração Master' },
+          { href: '/aprovacoes', label: 'Aprovação de Clientes', icon: Icons.ShieldCheck },
+        ]
+      : []),
     { section: 'Operação do Ateliê' },
     { href: '/vendas', label: 'Vendas & Pedidos', icon: Icons.Vendas },
     { href: '/encomendas', label: 'Encomendas', icon: Icons.Encomendas },
@@ -184,6 +241,7 @@ export default function AppShell({ children, title }: AppShellProps) {
     { href: '/ajuda', label: 'Central de Ajuda', icon: Icons.Ajuda },
   ];
 
+
   if (loading) {
     return (
       <div style={{ padding: '80px 20px', textAlign: 'center', minHeight: '100vh', display: 'grid', placeItems: 'center' }}>
@@ -200,6 +258,288 @@ export default function AppShell({ children, title }: AppShellProps) {
   const userName = profile?.nome?.trim() || user?.user_metadata?.nome || user?.email?.split('@')[0] || 'Artesã';
   const userSubtitle = businessName || user?.email || 'Ateliê Kroche';
 
+  if (user && !canAccessSystem) {
+    const isSuspendedUser = status === 'suspenso';
+    const isInactiveUser = !isActive;
+    const isPendingUser = isPending || (!isSuspendedUser && !isInactiveUser);
+
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: 'var(--fundo-claro, #F8FAFC)',
+        color: 'var(--texto, #0F172A)',
+        display: 'flex',
+        flexDirection: 'column',
+      }}>
+        {/* Barra Superior */}
+        <header style={{
+          padding: '16px 28px',
+          borderBottom: '1px solid var(--borda, #E2E8F0)',
+          background: 'var(--card, #FFFFFF)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ fontSize: '26px' }}>⚡</span>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: '18px', letterSpacing: '-0.3px' }}>
+                Gestor <b>Pro</b>
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--muted, #64748B)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>
+                Controle de Acesso
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button
+              type="button"
+              onClick={toggleTheme}
+              style={{
+                background: 'var(--creme-suave, #F1F5F9)',
+                border: '1px solid var(--borda, #E2E8F0)',
+                color: 'var(--texto, #0F172A)',
+                borderRadius: '8px',
+                padding: '6px 12px',
+                fontSize: '13px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+              title="Alternar Tema"
+            >
+              {theme === 'claro' ? <Icons.Moon /> : <Icons.Sun />}
+              <span>{theme === 'claro' ? 'Modo Escuro' : 'Modo Claro'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={logout}
+              style={{
+                background: 'transparent',
+                border: '1px solid var(--borda, #E2E8F0)',
+                color: 'var(--muted, #64748B)',
+                borderRadius: '8px',
+                padding: '6px 14px',
+                fontSize: '13px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+              title="Sair da conta"
+            >
+              <Icons.Logout />
+              <span>Sair</span>
+            </button>
+          </div>
+        </header>
+
+        {/* Conteúdo Central */}
+        <main style={{
+          flex: 1,
+          display: 'grid',
+          placeItems: 'center',
+          padding: '40px 20px',
+        }}>
+          <div style={{
+            maxWidth: '560px',
+            width: '100%',
+            background: 'var(--card, #FFFFFF)',
+            border: '1px solid var(--borda, #E2E8F0)',
+            borderRadius: '18px',
+            padding: '36px 32px',
+            boxShadow: 'var(--k-shadow, 0 10px 25px -5px rgba(15, 23, 42, .06))',
+            textAlign: 'center',
+          }}>
+            {/* Ícone de Destaque */}
+            <div style={{
+              width: '72px',
+              height: '72px',
+              margin: '0 auto 20px',
+              borderRadius: '20px',
+              display: 'grid',
+              placeItems: 'center',
+              fontSize: '32px',
+              background: isSuspendedUser
+                ? 'rgba(239, 68, 68, 0.12)'
+                : isInactiveUser
+                ? 'rgba(245, 158, 11, 0.12)'
+                : 'rgba(37, 99, 235, 0.12)',
+            }}>
+              {isSuspendedUser ? '⛔' : isInactiveUser ? '⏸️' : '⏳'}
+            </div>
+
+            {/* Badge de Status */}
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 14px',
+              borderRadius: '999px',
+              fontSize: '12px',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              marginBottom: '16px',
+              background: isSuspendedUser
+                ? 'rgba(239, 68, 68, 0.12)'
+                : isInactiveUser
+                ? 'rgba(245, 158, 11, 0.12)'
+                : 'rgba(217, 119, 6, 0.12)',
+              color: isSuspendedUser
+                ? '#DC2626'
+                : isInactiveUser
+                ? '#D97706'
+                : '#B45309',
+            }}>
+              <span style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                background: isSuspendedUser ? '#DC2626' : isInactiveUser ? '#D97706' : '#F59E0B',
+              }} />
+              {isSuspendedUser ? 'Acesso Suspenso' : isInactiveUser ? 'Conta Inativa' : 'Aguardando Aprovação'}
+            </div>
+
+            <h2 style={{
+              fontSize: '24px',
+              fontWeight: 800,
+              margin: '0 0 12px',
+              color: 'var(--texto, #0F172A)',
+              letterSpacing: '-0.4px',
+            }}>
+              {isSuspendedUser
+                ? 'Sua conta está suspensa'
+                : isInactiveUser
+                ? 'Seu acesso está inativo no momento'
+                : 'Seu cadastro está aguardando aprovação'}
+            </h2>
+
+            <p style={{
+              fontSize: '15px',
+              lineHeight: 1.6,
+              color: 'var(--muted, #64748B)',
+              margin: '0 0 24px',
+            }}>
+              {isSuspendedUser
+                ? 'O acesso a este painel foi temporariamente bloqueado pela administração do sistema. Entre em contato com nossa equipe para regularizar sua situação.'
+                : isInactiveUser
+                ? 'A sua conta de cliente está desativada no momento. Para reativar o seu acesso às ferramentas, fale com a administração.'
+                : `Olá, ${userName}! Seu cadastro foi registrado com sucesso. Para manter o controle de clientes e segurança das informações, sua conta está em análise e será liberada por um administrador em breve.`}
+            </p>
+
+            {/* Timeline explicativa caso esteja pendente */}
+            {isPendingUser && (
+              <div style={{
+                background: 'var(--creme-suave, #F1F5F9)',
+                borderRadius: '12px',
+                padding: '18px 20px',
+                marginBottom: '26px',
+                textAlign: 'left',
+              }}>
+                <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--muted, #64748B)', textTransform: 'uppercase', marginBottom: '12px', letterSpacing: '0.5px' }}>
+                  Etapas do seu Acesso
+                </div>
+                <div style={{ display: 'grid', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
+                    <span style={{ color: '#16A34A', fontWeight: 800 }}>✓</span>
+                    <span><strong>1. Cadastro criado:</strong> Informações recebidas no sistema</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
+                    <span style={{ color: '#F59E0B', fontWeight: 800 }}>⏳</span>
+                    <span><strong>2. Análise administrativa:</strong> Aprovação do seu e-mail e perfil</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: 'var(--muted, #64748B)' }}>
+                    <span>🔒</span>
+                    <span><strong>3. Acesso liberado:</strong> Vendas, estoque, catálogo e finanças</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Mensagem de Feedback da verificação */}
+            {checkMsg && (
+              <div style={{
+                padding: '12px 16px',
+                borderRadius: '10px',
+                fontSize: '13px',
+                marginBottom: '20px',
+                background: checkMsg.tipo === 'sucesso'
+                  ? 'rgba(34, 197, 94, 0.12)'
+                  : checkMsg.tipo === 'erro'
+                  ? 'rgba(239, 68, 68, 0.12)'
+                  : 'rgba(59, 130, 246, 0.12)',
+                color: checkMsg.tipo === 'sucesso'
+                  ? '#15803D'
+                  : checkMsg.tipo === 'erro'
+                  ? '#B91C1C'
+                  : '#1D4ED8',
+                border: '1px solid currentColor',
+              }}>
+                {checkMsg.texto}
+              </div>
+            )}
+
+            {/* Ações */}
+            <div style={{ display: 'grid', gap: '12px' }}>
+              <button
+                type="button"
+                onClick={handleCheckApproval}
+                disabled={checkingApproval}
+                style={{
+                  background: 'var(--marrom-principal, #2563EB)',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: '10px',
+                  padding: '14px 20px',
+                  fontSize: '15px',
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  cursor: checkingApproval ? 'not-allowed' : 'pointer',
+                  opacity: checkingApproval ? 0.7 : 1,
+                  transition: 'opacity 0.2s',
+                }}
+              >
+                <span>{checkingApproval ? 'Verificando status no banco...' : '🔄 Verificar aprovação agora'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={logout}
+                style={{
+                  background: 'transparent',
+                  color: 'var(--muted, #64748B)',
+                  border: '1px solid var(--borda, #E2E8F0)',
+                  borderRadius: '10px',
+                  padding: '11px 20px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                Sair da conta
+              </button>
+            </div>
+
+            <div style={{
+              marginTop: '24px',
+              paddingTop: '20px',
+              borderTop: '1px solid var(--borda, #E2E8F0)',
+              fontSize: '13px',
+              color: 'var(--muted, #64748B)',
+            }}>
+              Precisa de ajuda ou deseja agilizar sua liberação? Entre em contato com o administrador do sistema.
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <>
       <div
@@ -207,6 +547,7 @@ export default function AppShell({ children, title }: AppShellProps) {
         onClick={closeMenu}
         aria-hidden="true"
       />
+
       <div className="app">
         <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`} id="sidebar">
           {/* Header da Sidebar */}
