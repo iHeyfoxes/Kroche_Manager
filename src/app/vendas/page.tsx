@@ -239,7 +239,7 @@ export default function VendasPage() {
                     <td><b>{formatMoney(v.valor)}</b></td>
                     <td style={{ textAlign: 'right' }}>
                       <Link
-                        href={`/vendas/${v.id}/editar`}
+                        href={`/editar-venda?id=${v.id}`}
                         className="btn btn-secondary btn-sm"
                         style={{ marginRight: '6px' }}
                       >
