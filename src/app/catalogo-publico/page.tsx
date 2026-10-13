@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
-import { useParams } from 'next/navigation';
+import React, { Suspense, useEffect, useState, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { formatMoney } from '@/lib/utils';
 import { Usuario, Produto } from '@/types/database';
@@ -11,9 +11,9 @@ interface CartItem {
   quantidade: number;
 }
 
-export default function LojaSlugPage() {
-  const params = useParams();
-  const slug = (params?.slug as string) || '';
+function LojaSlugContent() {
+  const searchParams = useSearchParams();
+  const slug = searchParams.get('slug') || '';
 
   const [loja, setLoja] = useState<Usuario | null>(null);
   const [produtos, setProdutos] = useState<Produto[]>([]);
@@ -901,5 +901,14 @@ export default function LojaSlugPage() {
       {/* Toast Notification */}
       {toastMsg && <div className="catalogo-toast show">{toastMsg}</div>}
     </div>
+  );
+}
+
+
+export default function LojaSlugPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center' }}>Carregando catálogo...</div>}>
+      <LojaSlugContent />
+    </Suspense>
   );
 }

@@ -413,7 +413,7 @@ export default function EncomendasPage() {
                       </td>
                       <td style={{ textAlign: 'right' }}>
                         <Link
-                          href={`/encomendas/${enc.id}/editar`}
+                          href={`/editar-encomenda?id=${enc.id}`}
                           className="btn btn-secondary btn-sm"
                           style={{ marginRight: '6px' }}
                         >
