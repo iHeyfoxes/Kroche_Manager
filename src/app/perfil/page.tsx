@@ -240,9 +240,55 @@ export default function PerfilPage() {
           <p className="muted" style={{ margin: '0 0 4px', fontSize: '13px' }}>
             Responsável: <b>{nome || profile?.nome}</b>
           </p>
-          <p className="muted" style={{ margin: '0 0 18px', fontSize: '13px' }}>
+          <p className="muted" style={{ margin: '0 0 12px', fontSize: '13px' }}>
             {user?.email}
           </p>
+
+          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '16px' }}>
+            <span style={{
+              padding: '4px 10px',
+              borderRadius: '999px',
+              fontSize: '12px',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              background: (profile?.status || 'pendente') === 'aprovado'
+                ? 'rgba(34, 197, 94, 0.12)'
+                : (profile?.status || 'pendente') === 'suspenso'
+                ? 'rgba(239, 68, 68, 0.12)'
+                : 'rgba(245, 158, 11, 0.12)',
+              color: (profile?.status || 'pendente') === 'aprovado'
+                ? '#15803D'
+                : (profile?.status || 'pendente') === 'suspenso'
+                ? '#B91C1C'
+                : '#B45309',
+            }}>
+              Status: {profile?.status || 'pendente'}
+            </span>
+
+            <span style={{
+              padding: '4px 10px',
+              borderRadius: '999px',
+              fontSize: '12px',
+              fontWeight: 700,
+              background: profile?.ativo !== false ? 'rgba(34, 197, 94, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+              color: profile?.ativo !== false ? '#15803D' : '#B91C1C',
+            }}>
+              {profile?.ativo !== false ? 'Conta Ativa' : 'Conta Inativa'}
+            </span>
+
+            {Boolean(profile?.masteracess ?? profile?.masterAcess) && (
+              <span style={{
+                padding: '4px 10px',
+                borderRadius: '999px',
+                fontSize: '12px',
+                fontWeight: 700,
+                background: 'rgba(124, 58, 237, 0.12)',
+                color: '#6D28D9',
+              }}>
+                🛡️ Master
+              </span>
+            )}
+          </div>
 
           <hr style={{ border: '0', borderTop: '1px solid var(--borda)', margin: '20px 0' }} />
 

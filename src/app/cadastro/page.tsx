@@ -41,7 +41,7 @@ export default function CadastroPage() {
 
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email: email.trim(),
       password: senha,
       options: {
@@ -58,6 +58,24 @@ export default function CadastroPage() {
       setAlerta({ tipo: 'erro', msg: supabaseErrorText(error) });
       setLoading(false);
       return;
+    }
+
+    if (signUpData?.user) {
+      try {
+        await supabase.from('usuarios').upsert({
+          id: signUpData.user.id,
+          nome: nome.trim(),
+          email: email.trim(),
+          slug: (nome.trim().toLowerCase().replace(/[^a-z0-9]/g, '-') || 'loja') + '-' + signUpData.user.id.slice(0, 4),
+          tema: 'claro',
+          status: 'pendente',
+          ativo: true,
+          masteracess: false,
+          aceitou_termos: true,
+          aceitou_politica: true,
+        }, { onConflict: 'id' });
+      } catch {
+      }
     }
 
     setAlerta({ tipo: 'sucesso', msg: 'Conta criada com sucesso! Redirecionando para o login...' });
