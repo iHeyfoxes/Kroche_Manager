@@ -216,38 +216,38 @@ export default function AppShell({ children, title }: AppShellProps) {
     label?: string;
     icon?: React.ComponentType;
   }> = [
-    { section: 'Visão Geral' },
-    { href: '/dashboard', label: 'Dashboard', icon: Icons.Dashboard },
-    ...(isMaster
-      ? [
+      { section: 'Visão Geral' },
+      { href: '/dashboard', label: 'Dashboard', icon: Icons.Dashboard },
+      ...(isMaster
+        ? [
           { section: 'Administração Master' },
           { href: '/aprovacoes', label: 'Aprovação de Clientes', icon: Icons.ShieldCheck },
         ]
-      : []),
-    { section: 'Operação do Ateliê' },
-    { href: '/vendas', label: 'Vendas & Pedidos', icon: Icons.Vendas },
-    { href: '/encomendas', label: 'Encomendas', icon: Icons.Encomendas },
-    { href: '/compras', label: 'Compras & Custos', icon: Icons.Compras },
-    { href: '/estoque', label: 'Estoque de Fios', icon: Icons.Estoque },
-    { href: '/receitas', label: 'Receitas & Fichas', icon: Icons.Receitas },
-    { section: 'Clientes & Catálogo' },
-    { href: '/leads', label: 'Clientes & Contatos', icon: Icons.Leads },
-    { href: '/minha-loja', label: 'Catálogo / Loja Online', icon: Icons.Loja },
-    { section: 'Gestão Financeira' },
-    { href: '/relatorios', label: 'Relatórios Financeiros', icon: Icons.Relatorios },
-    { href: '/calculadora', label: 'Calculadora de Preço', icon: Icons.Calculadora },
-    { section: 'Configurações' },
-    { href: '/perfil', label: 'Meu Perfil & Ateliê', icon: Icons.Perfil },
-    { href: '/ajuda', label: 'Central de Ajuda', icon: Icons.Ajuda },
-  ];
+        : []),
+      { section: 'Operação Comercial' },
+      { href: '/vendas', label: 'Vendas & Pedidos', icon: Icons.Vendas },
+      { href: '/encomendas', label: 'Encomendas', icon: Icons.Encomendas },
+      { href: '/compras', label: 'Compras & Custos', icon: Icons.Compras },
+      { href: '/estoque', label: 'Estoque', icon: Icons.Estoque },
+      { href: '/receitas', label: 'Receitas & Fichas', icon: Icons.Receitas },
+      { section: 'Clientes & Catálogo' },
+      { href: '/leads', label: 'Clientes & Contatos', icon: Icons.Leads },
+      { href: '/minha-loja', label: 'Catálogo / Loja Online', icon: Icons.Loja },
+      { section: 'Gestão Financeira' },
+      { href: '/relatorios', label: 'Relatórios Financeiros', icon: Icons.Relatorios },
+      { href: '/calculadora', label: 'Calculadora de Preço', icon: Icons.Calculadora },
+      { section: 'Configurações' },
+      { href: '/perfil', label: 'Meu Perfil & Empresa', icon: Icons.Perfil },
+      { href: '/ajuda', label: 'Central de Ajuda', icon: Icons.Ajuda },
+    ];
 
 
   if (loading) {
     return (
       <div style={{ padding: '80px 20px', textAlign: 'center', minHeight: '100vh', display: 'grid', placeItems: 'center' }}>
         <div>
-          <div style={{ fontSize: '42px', marginBottom: '16px' }}>🧶</div>
-          <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 6px', color: 'var(--texto)' }}>Carregando seu ateliê...</h2>
+          <div style={{ fontSize: '42px', marginBottom: '16px' }}>💼</div>
+          <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 6px', color: 'var(--texto)' }}>Carregando seu negócio...</h2>
           <p className="muted" style={{ margin: 0, fontSize: '14px' }}>Preparando Kroche Manager</p>
         </div>
       </div>
@@ -255,8 +255,8 @@ export default function AppShell({ children, title }: AppShellProps) {
   }
 
   const businessName = profile?.catalogo_nome?.trim() || '';
-  const userName = profile?.nome?.trim() || user?.user_metadata?.nome || user?.email?.split('@')[0] || 'Artesã';
-  const userSubtitle = businessName || user?.email || 'Ateliê Kroche';
+  const userName = profile?.nome?.trim() || user?.user_metadata?.nome || user?.email?.split('@')[0] || 'Gestor(a)';
+  const userSubtitle = businessName || user?.email || 'Sua Empresa';
 
   if (user && !canAccessSystem) {
     const isSuspendedUser = status === 'suspenso';
@@ -364,8 +364,8 @@ export default function AppShell({ children, title }: AppShellProps) {
               background: isSuspendedUser
                 ? 'rgba(239, 68, 68, 0.12)'
                 : isInactiveUser
-                ? 'rgba(245, 158, 11, 0.12)'
-                : 'rgba(37, 99, 235, 0.12)',
+                  ? 'rgba(245, 158, 11, 0.12)'
+                  : 'rgba(37, 99, 235, 0.12)',
             }}>
               {isSuspendedUser ? '⛔' : isInactiveUser ? '⏸️' : '⏳'}
             </div>
@@ -385,13 +385,13 @@ export default function AppShell({ children, title }: AppShellProps) {
               background: isSuspendedUser
                 ? 'rgba(239, 68, 68, 0.12)'
                 : isInactiveUser
-                ? 'rgba(245, 158, 11, 0.12)'
-                : 'rgba(217, 119, 6, 0.12)',
+                  ? 'rgba(245, 158, 11, 0.12)'
+                  : 'rgba(217, 119, 6, 0.12)',
               color: isSuspendedUser
                 ? '#DC2626'
                 : isInactiveUser
-                ? '#D97706'
-                : '#B45309',
+                  ? '#D97706'
+                  : '#B45309',
             }}>
               <span style={{
                 width: '8px',
@@ -412,8 +412,8 @@ export default function AppShell({ children, title }: AppShellProps) {
               {isSuspendedUser
                 ? 'Sua conta está suspensa'
                 : isInactiveUser
-                ? 'Seu acesso está inativo no momento'
-                : 'Seu cadastro está aguardando aprovação'}
+                  ? 'Seu acesso está inativo no momento'
+                  : 'Seu cadastro está aguardando aprovação'}
             </h2>
 
             <p style={{
@@ -425,8 +425,8 @@ export default function AppShell({ children, title }: AppShellProps) {
               {isSuspendedUser
                 ? 'O acesso a este painel foi temporariamente bloqueado pela administração do sistema. Entre em contato com nossa equipe para regularizar sua situação.'
                 : isInactiveUser
-                ? 'A sua conta de cliente está desativada no momento. Para reativar o seu acesso às ferramentas, fale com a administração.'
-                : `Olá, ${userName}! Seu cadastro foi registrado com sucesso. Para manter o controle de clientes e segurança das informações, sua conta está em análise e será liberada por um administrador em breve.`}
+                  ? 'A sua conta de cliente está desativada no momento. Para reativar o seu acesso às ferramentas, fale com a administração.'
+                  : `Olá, ${userName}! Seu cadastro foi registrado com sucesso. Para manter o controle de clientes e segurança das informações, sua conta está em análise e será liberada por um administrador em breve.`}
             </p>
 
             {/* Timeline explicativa caso esteja pendente */}
@@ -468,13 +468,13 @@ export default function AppShell({ children, title }: AppShellProps) {
                 background: checkMsg.tipo === 'sucesso'
                   ? 'rgba(34, 197, 94, 0.12)'
                   : checkMsg.tipo === 'erro'
-                  ? 'rgba(239, 68, 68, 0.12)'
-                  : 'rgba(59, 130, 246, 0.12)',
+                    ? 'rgba(239, 68, 68, 0.12)'
+                    : 'rgba(59, 130, 246, 0.12)',
                 color: checkMsg.tipo === 'sucesso'
                   ? '#15803D'
                   : checkMsg.tipo === 'erro'
-                  ? '#B91C1C'
-                  : '#1D4ED8',
+                    ? '#B91C1C'
+                    : '#1D4ED8',
                 border: '1px solid currentColor',
               }}>
                 {checkMsg.texto}
@@ -554,13 +554,13 @@ export default function AppShell({ children, title }: AppShellProps) {
           <div className="sidebar-header">
             <Link href="/dashboard" className="brand" onClick={closeMenu}>
               <div className="brand-icon-wrapper">
-                <span className="brand-icon">🧶</span>
+                <span className="brand-icon">⚡</span>
               </div>
               <div className="brand-text">
                 <span className="brand-name" title={businessName || 'Kroche Manager'}>
                   {businessName ? businessName : <>Kroche <b>Manager</b></>}
                 </span>
-                <span className="brand-sub">Gestão do Ateliê</span>
+                <span className="brand-sub">Gestão Empresarial</span>
               </div>
             </Link>
 
@@ -661,7 +661,7 @@ export default function AppShell({ children, title }: AppShellProps) {
         <main className="main">
           <div className="top">
             <div>
-              <div className="page-kicker">PAINEL DO ATELIÊ</div>
+              <div className="page-kicker">PAINEL EMPRESARIAL</div>
               <h1 id="pageTitle">{title}</h1>
               <span className="muted">
                 Olá, <b>{userName}</b>

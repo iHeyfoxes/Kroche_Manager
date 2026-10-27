@@ -8,12 +8,14 @@ import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { formatMoney, uploadToStorage, slugify } from '@/lib/utils';
 import { Produto, CategoriaProduto } from '@/types/database';
+import ProductSpreadsheetImport from '@/components/ProductSpreadsheetImport';
 
 export default function MinhaLojaPage() {
   const { user, profile, loading } = useAuth();
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState<'produtos' | 'categorias' | 'config'>('produtos');
+  const [cadastroModo, setCadastroModo] = useState<'manual' | 'planilha'>('manual');
 
   // Products state
   const [produtos, setProdutos] = useState<Produto[]>([]);
@@ -34,6 +36,7 @@ export default function MinhaLojaPage() {
 
   // Category form states
   const [nomeCategoria, setNomeCategoria] = useState('');
+  const [editingCategory, setEditingCategory] = useState<CategoriaProduto | null>(null);
   const [savingCategory, setSavingCategory] = useState(false);
 
   const [msg, setMsg] = useState<{ tipo: 'ok' | 'err'; texto: string } | null>(null);
@@ -73,6 +76,7 @@ export default function MinhaLojaPage() {
 
   const handleEditClick = (p: Produto) => {
     setEditingProduct(p);
+    setCadastroModo('manual');
     setNome(p.nome);
     setPreco(String(p.preco));
     setQuantidade(String(p.quantidade));
@@ -125,6 +129,42 @@ export default function MinhaLojaPage() {
         setMsg({ tipo: 'ok', texto: 'Produto cadastrado com sucesso!' });
       }
 
+ 
+      try {
+        const catObj = categorias.find((c) => String(c.id) === String(categoriaId));
+        const { data: matExistente } = await supabase
+          .from('materiais')
+          .select('id')
+          .eq('usuario_id', user.id)
+          .ilike('nome', nome.trim())
+          .maybeSingle();
+
+        if (matExistente) {
+          await supabase
+            .from('materiais')
+            .update({
+              quantidade: Number(quantidade),
+              estoque_minimo: Number(estoqueMinimo || 0),
+              custo_unitario: Number(preco),
+              categoria: catObj?.nome || null,
+            })
+            .eq('id', matExistente.id)
+            .eq('usuario_id', user.id);
+        } else {
+          await supabase.from('materiais').insert({
+            usuario_id: user.id,
+            nome: nome.trim(),
+            categoria: catObj?.nome || null,
+            unidade: 'unidade',
+            quantidade: Number(quantidade),
+            estoque_minimo: Number(estoqueMinimo || 0),
+            custo_unitario: Number(preco),
+          });
+        }
+      } catch (syncErr) {
+        console.warn('Erro ao sincronizar com materiais do estoque:', syncErr);
+      }
+
       resetProductForm();
       loadAll();
     } catch (err: any) {
@@ -152,6 +192,13 @@ export default function MinhaLojaPage() {
     }
   };
 
+  const handleEditCategoryClick = (c: CategoriaProduto) => {
+    setEditingCategory(c);
+    setNomeCategoria(c.nome);
+    const el = document.getElementById('card-categoria-form');
+    el?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   const handleSalvarCategoria = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !nomeCategoria.trim()) return;
@@ -161,21 +208,64 @@ export default function MinhaLojaPage() {
 
     const slug = slugify(nomeCategoria);
 
-    const { error } = await supabase.from('categorias_produtos').insert({
-      usuario_id: user.id,
-      nome: nomeCategoria.trim(),
-      slug,
-    });
+    if (editingCategory) {
+      const oldNome = editingCategory.nome;
+      const novoNome = nomeCategoria.trim();
 
-    if (error) {
-      setMsg({
-        tipo: 'err',
-        texto: error.code === '23505' ? 'Essa categoria já existe.' : error.message,
-      });
+      const { error } = await supabase
+        .from('categorias_produtos')
+        .update({
+          nome: novoNome,
+          slug,
+        })
+        .eq('id', editingCategory.id)
+        .eq('usuario_id', user.id);
+
+      if (error) {
+        setMsg({
+          tipo: 'err',
+          texto: error.code === '23505' ? 'Essa categoria já existe.' : error.message,
+        });
+      } else {
+        // Atualiza o nome da categoria nos produtos vinculados
+        try {
+          await supabase
+            .from('produtos')
+            .update({ categoria: novoNome })
+            .eq('categoria_id', editingCategory.id)
+            .eq('usuario_id', user.id);
+
+          await supabase
+            .from('materiais')
+            .update({ categoria: novoNome })
+            .eq('usuario_id', user.id)
+            .ilike('categoria', oldNome);
+        } catch (syncCatErr) {
+          console.warn('Erro ao propagar alteração de categoria nos produtos:', syncCatErr);
+        }
+
+        setMsg({ tipo: 'ok', texto: 'Categoria alterada com sucesso!' });
+        setEditingCategory(null);
+        setNomeCategoria('');
+        loadAll();
+      }
     } else {
-      setMsg({ tipo: 'ok', texto: 'Categoria criada com sucesso!' });
-      setNomeCategoria('');
-      loadAll();
+      const { error } = await supabase.from('categorias_produtos').insert({
+        usuario_id: user.id,
+        nome: nomeCategoria.trim(),
+        slug,
+      });
+
+      if (error) {
+        setMsg({
+          tipo: 'err',
+          texto: error.code === '23505' ? 'Essa categoria já existe.' : error.message,
+        });
+      } else {
+        setMsg({ tipo: 'ok', texto: 'Categoria criada com sucesso!' });
+        setNomeCategoria('');
+        loadAll();
+      }
     }
     setSavingCategory(false);
   };
@@ -268,141 +358,208 @@ export default function MinhaLojaPage() {
 
       {activeTab === 'produtos' && (
         <div>
-          <div className="card">
+          <div className="card" id="card-produto-form">
             <div className="panel-heading">
               <div>
                 <span className="panel-kicker">CATÁLOGO</span>
-                <h3>{editingProduct ? 'Editar produto' : 'Novo produto'}</h3>
+                <h3>
+                  {editingProduct
+                    ? 'Editar produto'
+                    : cadastroModo === 'planilha'
+                    ? 'Auto-Cadastro de Produtos via Planilha'
+                    : 'Novo produto'}
+                </h3>
               </div>
-              <span className="pill">Minha Loja</span>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                {!editingProduct && (
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <button
+                      type="button"
+                      className={`btn btn-sm ${cadastroModo === 'manual' ? 'btn-primary' : 'btn-secondary'}`}
+                      onClick={() => setCadastroModo('manual')}
+                    >
+                      ✏️ Cadastro Individual
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn btn-sm ${cadastroModo === 'planilha' ? 'btn-primary' : 'btn-secondary'}`}
+                      onClick={() => setCadastroModo('planilha')}
+                    >
+                      📊 Importar Planilha
+                    </button>
+                  </div>
+                )}
+                <span className="pill">Minha Loja</span>
+              </div>
             </div>
 
-            <form onSubmit={handleSalvarProduto} className="grid grid-3">
-              <div>
-                <label className="label">Nome do Produto / Item *</label>
-                <input
-                  type="text"
-                  className="input"
-                  required
-                  placeholder="Ex.: Armação Ray-Ban, Óculos Solar, Lentes, Produto"
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="label">Preço (R$) *</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  className="input"
-                  required
-                  placeholder="0,00"
-                  value={preco}
-                  onChange={(e) => setPreco(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="label">Quantidade em Estoque *</label>
-                <input
-                  type="number"
-                  min="0"
-                  className="input"
-                  required
-                  value={quantidade}
-                  onChange={(e) => setQuantidade(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="label">Estoque Mínimo</label>
-                <input
-                  type="number"
-                  min="0"
-                  className="input"
-                  value={estoqueMinimo}
-                  onChange={(e) => setEstoqueMinimo(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="label">Prazo de Entrega / Produção (dias)</label>
-                <input
-                  type="number"
-                  min="0"
-                  className="input"
-                  placeholder="Ex.: 3"
-                  value={tempoProducao}
-                  onChange={(e) => setTempoProducao(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="label">Categoria</label>
-                <select
-                  className="select"
-                  value={categoriaId}
-                  onChange={(e) => setCategoriaId(e.target.value)}
-                >
-                  <option value="">Sem categoria</option>
-                  {categorias.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.nome}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="label">Foto do Produto</label>
-                <input
-                  type="file"
-                  className="input"
-                  accept="image/png,image/jpeg,image/webp"
-                  onChange={(e) => setFotoFile(e.target.files?.[0] || null)}
-                />
-              </div>
-
-              <div>
-                <label className="label">Exibição no Catálogo</label>
-                <select
-                  className="select"
-                  value={mostrarCatalogo ? 'true' : 'false'}
-                  onChange={(e) => setMostrarCatalogo(e.target.value === 'true')}
-                >
-                  <option value="true">Visível no catálogo público</option>
-                  <option value="false">Oculto</option>
-                </select>
-              </div>
-
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label className="label">Descrição do Produto</label>
-                <textarea
-                  className="textarea"
-                  rows={2}
-                  placeholder="Detalhes, tamanho aproximado, material..."
-                  value={descricao}
-                  onChange={(e) => setDescricao(e.target.value)}
-                />
-              </div>
-
-              <div className="actions" style={{ gridColumn: '1 / -1', justifyContent: 'flex-end' }}>
-                {editingProduct && (
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={resetProductForm}
-                  >
-                    Cancelar
-                  </button>
-                )}
-                <button type="submit" className="btn btn-primary" disabled={savingProduct}>
-                  {savingProduct ? 'Salvando...' : editingProduct ? 'Salvar Alterações' : 'Cadastrar Produto'}
+            {editingProduct && (
+              <div
+                style={{
+                  background: 'rgba(37, 99, 235, 0.08)',
+                  border: '1px solid var(--marrom-principal)',
+                  padding: '10px 14px',
+                  borderRadius: '8px',
+                  marginBottom: '16px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <span>
+                  ✏️ <b>Modo de alteração:</b> Editando produto <b>"{editingProduct.nome}"</b>
+                </span>
+                <button type="button" className="btn btn-secondary btn-sm" onClick={resetProductForm}>
+                  Cancelar Alteração
                 </button>
               </div>
-            </form>
+            )}
+
+            {cadastroModo === 'planilha' && !editingProduct ? (
+              <ProductSpreadsheetImport
+                userId={user?.id || ''}
+                categoriasExistentes={categorias}
+                produtosExistentes={produtos}
+                onSuccess={(res) => {
+                  setMsg({
+                    tipo: 'ok',
+                    texto: `Importação realizada com sucesso! ${res.cadastrados} produto(s) cadastrado(s), ${res.atualizados} atualizado(s)${
+                      res.categoriasCriadas > 0 ? ` e ${res.categoriasCriadas} nova(s) categoria(s) criada(s)` : ''
+                    }.`,
+                  });
+                  setCadastroModo('manual');
+                  loadAll();
+                }}
+                onCancel={() => setCadastroModo('manual')}
+              />
+            ) : (
+              <form onSubmit={handleSalvarProduto} className="grid grid-3">
+                <div>
+                  <label className="label">Nome do Produto / Item *</label>
+                  <input
+                    type="text"
+                    className="input"
+                    required
+                    placeholder="Ex.: Armação Ray-Ban, Óculos Solar, Lentes, Produto"
+                    value={nome}
+                    onChange={(e) => setNome(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="label">Preço (R$) *</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    className="input"
+                    required
+                    placeholder="0,00"
+                    value={preco}
+                    onChange={(e) => setPreco(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="label">Quantidade em Estoque *</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className="input"
+                    required
+                    value={quantidade}
+                    onChange={(e) => setQuantidade(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="label">Estoque Mínimo</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className="input"
+                    value={estoqueMinimo}
+                    onChange={(e) => setEstoqueMinimo(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="label">Prazo de Entrega / Produção (dias)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className="input"
+                    placeholder="Ex.: 3"
+                    value={tempoProducao}
+                    onChange={(e) => setTempoProducao(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="label">Categoria</label>
+                  <select
+                    className="select"
+                    value={categoriaId}
+                    onChange={(e) => setCategoriaId(e.target.value)}
+                  >
+                    <option value="">Sem categoria</option>
+                    {categorias.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.nome}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="label">Foto do Produto</label>
+                  <input
+                    type="file"
+                    className="input"
+                    accept="image/png,image/jpeg,image/webp"
+                    onChange={(e) => setFotoFile(e.target.files?.[0] || null)}
+                  />
+                </div>
+
+                <div>
+                  <label className="label">Exibição no Catálogo</label>
+                  <select
+                    className="select"
+                    value={mostrarCatalogo ? 'true' : 'false'}
+                    onChange={(e) => setMostrarCatalogo(e.target.value === 'true')}
+                  >
+                    <option value="true">Visível no catálogo público</option>
+                    <option value="false">Oculto</option>
+                  </select>
+                </div>
+
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label className="label">Descrição do Produto</label>
+                  <textarea
+                    className="textarea"
+                    rows={2}
+                    placeholder="Detalhes, tamanho aproximado, material..."
+                    value={descricao}
+                    onChange={(e) => setDescricao(e.target.value)}
+                  />
+                </div>
+
+                <div className="actions" style={{ gridColumn: '1 / -1', justifyContent: 'flex-end' }}>
+                  {editingProduct && (
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={resetProductForm}
+                    >
+                      Cancelar
+                    </button>
+                  )}
+                  <button type="submit" className="btn btn-primary" disabled={savingProduct}>
+                    {savingProduct ? 'Salvando...' : editingProduct ? 'Salvar Alterações' : 'Cadastrar Produto'}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
 
           <div className="card">
@@ -411,7 +568,20 @@ export default function MinhaLojaPage() {
                 <span className="panel-kicker">PRODUTOS</span>
                 <h3>Produtos cadastrados</h3>
               </div>
-              <span className="pill">{produtos.length} itens</span>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => {
+                    setEditingProduct(null);
+                    setCadastroModo('planilha');
+                    window.scrollTo({ top: 300, behavior: 'smooth' });
+                  }}
+                >
+                  📥 Subir Planilha de Produtos
+                </button>
+                <span className="pill">{produtos.length} itens</span>
+              </div>
             </div>
 
             <div>
@@ -421,7 +591,7 @@ export default function MinhaLojaPage() {
                   return (
                     <div key={p.id} className="store-product-row">
                       <div className="store-product-thumb">
-                        {p.foto ? <img src={p.foto} alt={p.nome} /> : <span>🧶</span>}
+                        {p.foto ? <img src={p.foto} alt={p.nome} /> : <span>📦</span>}
                       </div>
                       <div className="store-product-main">
                         <b>{p.nome}</b>
@@ -466,17 +636,46 @@ export default function MinhaLojaPage() {
 
       {activeTab === 'categorias' && (
         <div className="grid grid-2">
-          <div className="card">
+          <div className="card" id="card-categoria-form">
             <div className="panel-heading">
               <div>
                 <span className="panel-kicker">ORGANIZAÇÃO</span>
-                <h3>Nova categoria</h3>
+                <h3>{editingCategory ? 'Editar categoria' : 'Nova categoria'}</h3>
               </div>
             </div>
 
+            {editingCategory && (
+              <div
+                style={{
+                  background: 'rgba(37, 99, 235, 0.08)',
+                  border: '1px solid var(--marrom-principal)',
+                  padding: '10px 14px',
+                  borderRadius: '8px',
+                  marginBottom: '16px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <span>
+                  ✏️ <b>Modo de alteração:</b> Editando categoria <b>"{editingCategory.nome}"</b>
+                </span>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => {
+                    setEditingCategory(null);
+                    setNomeCategoria('');
+                  }}
+                >
+                  Cancelar
+                </button>
+              </div>
+            )}
+
             <form onSubmit={handleSalvarCategoria}>
               <div>
-                <label className="label">Nome da categoria</label>
+                <label className="label">Nome da categoria *</label>
                 <input
                   type="text"
                   className="input"
@@ -486,14 +685,31 @@ export default function MinhaLojaPage() {
                   onChange={(e) => setNomeCategoria(e.target.value)}
                 />
               </div>
-              <button
-                type="submit"
-                className="btn btn-primary"
-                style={{ marginTop: '16px' }}
-                disabled={savingCategory}
-              >
-                {savingCategory ? 'Criando...' : 'Criar Categoria'}
-              </button>
+              <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={savingCategory}
+                >
+                  {savingCategory
+                    ? 'Salvando...'
+                    : editingCategory
+                    ? 'Salvar Alteração'
+                    : 'Criar Categoria'}
+                </button>
+                {editingCategory && (
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => {
+                      setEditingCategory(null);
+                      setNomeCategoria('');
+                    }}
+                  >
+                    Cancelar
+                  </button>
+                )}
+              </div>
             </form>
           </div>
 
@@ -524,13 +740,22 @@ export default function MinhaLojaPage() {
                       <br />
                       <small className="muted">slug: /{c.slug}</small>
                     </div>
-                    <button
-                      type="button"
-                      className="btn btn-danger btn-sm"
-                      onClick={() => handleExcluirCategoria(c.id)}
-                    >
-                      Excluir
-                    </button>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => handleEditCategoryClick(c)}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleExcluirCategoria(c.id)}
+                      >
+                        Excluir
+                      </button>
+                    </div>
                   </div>
                 ))
               ) : (
