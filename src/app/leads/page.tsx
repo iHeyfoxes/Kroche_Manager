@@ -9,7 +9,7 @@ import { formatMoney, formatDate } from '@/lib/utils';
 import { Lead } from '@/types/database';
 
 export default function LeadsPage() {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const router = useRouter();
 
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -230,14 +230,24 @@ export default function LeadsPage() {
                     <td>{formatDate(l.data)}</td>
                     <td><b>{l.nome_cliente}</b></td>
                     <td>
-                      <a
-                        href={`https://wa.me/${l.telefone_cliente?.replace(/\D/g, '')}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ color: '#16a34a', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                      >
-                        💬 {l.telefone_cliente}
-                      </a>
+                      {l.telefone_cliente ? (() => {
+                        const cleanPhone = l.telefone_cliente.replace(/\D/g, '');
+                        const zapNum = cleanPhone.length <= 11 && !cleanPhone.startsWith('55') ? `55${cleanPhone}` : cleanPhone;
+                        const msgLead = `👋 Olá, *${l.nome_cliente}*! Tudo bem?\nAqui é da equipe *${profile?.catalogo_nome || 'Nossa Empresa'}*. Vimos seu interesse em nossos produtos/serviços (${formatMoney(l.valor_total)}). Como podemos te ajudar?`;
+                        return (
+                          <a
+                            href={`https://wa.me/${zapNum}?text=${encodeURIComponent(msgLead)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: '#16a34a', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                            title="Conversar com o cliente no WhatsApp"
+                          >
+                            💬 {l.telefone_cliente}
+                          </a>
+                        );
+                      })() : (
+                        <span className="muted">—</span>
+                      )}
                     </td>
                     <td>
                       <b>{formatMoney(l.valor_total)}</b>

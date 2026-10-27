@@ -9,12 +9,23 @@ import { supabase } from '@/lib/supabase';
 import { formatMoney, formatDate } from '@/lib/utils';
 import { Encomenda, PedidoItem } from '@/types/database';
 
+interface ProdutoItem {
+  id: number;
+  nome: string;
+  preco: number;
+  quantidade?: number;
+  estoque_minimo?: number;
+}
+
 export default function EncomendasPage() {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const router = useRouter();
 
   const [encomendas, setEncomendas] = useState<Encomenda[]>([]);
   const [pedidoItens, setPedidoItens] = useState<Record<number, PedidoItem[]>>({});
+  const [produtos, setProdutos] = useState<ProdutoItem[]>([]);
+  const [editingEncomenda, setEditingEncomenda] = useState<Encomenda | null>(null);
+
   const [busca, setBusca] = useState('');
   const [filtroStatus, setFiltroStatus] = useState('');
   const [filtroOrigem, setFiltroOrigem] = useState('');
@@ -22,12 +33,17 @@ export default function EncomendasPage() {
   // Form states
   const [cliente, setCliente] = useState('');
   const [telefone, setTelefone] = useState('');
+  const [selectedProdId, setSelectedProdId] = useState<string>('');
   const [produto, setProduto] = useState('');
+  const [precoUnitario, setPrecoUnitario] = useState<string>('');
+  const [quantidade, setQuantidade] = useState('1');
   const [valor, setValor] = useState('');
   const [sinal, setSinal] = useState('0');
+  const [formaPagamento, setFormaPagamento] = useState('Pix');
   const [dataEntrega, setDataEntrega] = useState('');
   const [status, setStatus] = useState('Pendente');
   const [observacoes, setObservacoes] = useState('');
+  const [darBaixaEstoque, setDarBaixaEstoque] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [msg, setMsg] = useState<{ tipo: 'ok' | 'err'; texto: string } | null>(null);
 
@@ -35,23 +51,34 @@ export default function EncomendasPage() {
     if (!loading && !user) router.replace('/login');
   }, [user, loading, router]);
 
-  const loadEncomendas = async () => {
+  const loadData = async () => {
     if (!user) return;
-    const { data, error } = await supabase
-      .from('encomendas')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('data', { ascending: false });
+    const [encRes, prodRes] = await Promise.all([
+      supabase
+        .from('encomendas')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('data', { ascending: false }),
+      supabase
+        .from('produtos')
+        .select('id, nome, preco, quantidade, estoque_minimo')
+        .eq('usuario_id', user.id)
+        .order('nome'),
+    ]);
 
-    if (error) {
-      setMsg({ tipo: 'err', texto: error.message });
+    if (encRes.error) {
+      setMsg({ tipo: 'err', texto: encRes.error.message });
       return;
     }
 
-    setEncomendas(data || []);
+    setEncomendas(encRes.data || []);
+
+    if (prodRes.data) {
+      setProdutos(prodRes.data);
+    }
 
     // Load catalog items for orders that came from the catalog
-    const catalogIds = (data || [])
+    const catalogIds = (encRes.data || [])
       .map((x) => x.pedido_catalogo_id)
       .filter((id): id is number => typeof id === 'number');
 
@@ -74,8 +101,181 @@ export default function EncomendasPage() {
   };
 
   useEffect(() => {
-    if (user) loadEncomendas();
+    if (user) loadData();
   }, [user]);
+
+  const resetForm = () => {
+    setEditingEncomenda(null);
+    setCliente('');
+    setTelefone('');
+    setSelectedProdId('');
+    setProduto('');
+    setPrecoUnitario('');
+    setQuantidade('1');
+    setValor('');
+    setSinal('0');
+    setFormaPagamento('Pix');
+    setDataEntrega('');
+    setStatus('Pendente');
+    setObservacoes('');
+    setDarBaixaEstoque(true);
+  };
+
+  const handleSelectProduto = (prodIdStr: string) => {
+    setSelectedProdId(prodIdStr);
+
+    if (!prodIdStr) {
+      setProduto('');
+      setPrecoUnitario('');
+      setValor('');
+      return;
+    }
+
+    if (prodIdStr === '__manual__') {
+      setProduto('');
+      setPrecoUnitario('');
+      return;
+    }
+
+    const found = produtos.find((p) => String(p.id) === prodIdStr);
+    if (found) {
+      setProduto(found.nome);
+      setPrecoUnitario(String(found.preco));
+      const qtdNum = Number(quantidade) > 0 ? Number(quantidade) : 1;
+      setValor((qtdNum * Number(found.preco || 0)).toFixed(2));
+    }
+  };
+
+  const handleQuantidadeChange = (novaQtd: string) => {
+    setQuantidade(novaQtd);
+    const qtdNum = Number(novaQtd);
+    if (precoUnitario && !isNaN(qtdNum) && qtdNum >= 0) {
+      setValor((qtdNum * Number(precoUnitario)).toFixed(2));
+    }
+  };
+
+  const selectedProdutoObj = produtos.find(
+    (p) => String(p.id) === selectedProdId || (p.nome && p.nome.toLowerCase() === produto.trim().toLowerCase())
+  );
+
+  const handleEditClick = (enc: Encomenda) => {
+    setEditingEncomenda(enc);
+    setCliente(enc.cliente);
+    setTelefone(enc.telefone || '');
+    setProduto(enc.produto);
+    setValor(String(enc.valor));
+    setSinal(String(enc.sinal || 0));
+    setDataEntrega(enc.data_entrega || '');
+    setStatus(enc.status || 'Pendente');
+
+    // Extrai a forma de pagamento das observações se houver
+    const obsVal = enc.observacoes || '';
+    const matchPag = obsVal.match(/\[Pagamento:\s*([^\]]+)\]/i);
+    if (matchPag) {
+      setFormaPagamento(matchPag[1].trim());
+      setObservacoes(obsVal.replace(/\[Pagamento:\s*[^\]]+\]\s*/i, '').trim());
+    } else {
+      const matchOld = obsVal.match(/Pagamento:\s*([^|;\n]+)/i);
+      if (matchOld) {
+        setFormaPagamento(matchOld[1].trim());
+        setObservacoes(obsVal.replace(/Pagamento:\s*[^|;\n]+(\s*\|\s*)?/i, '').trim());
+      } else {
+        setFormaPagamento('Pix');
+        setObservacoes(obsVal);
+      }
+    }
+
+    setSelectedProdId('__manual__');
+    setPrecoUnitario('');
+    setQuantidade('1');
+    setDarBaixaEstoque(false);
+    setMsg(null);
+
+    const el = document.getElementById('card-form-encomenda');
+    el?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const getWhatsAppUrl = (enc: Encomenda) => {
+    if (!enc.telefone) return '#';
+
+    const cleanPhone = enc.telefone.replace(/\D/g, '');
+    const zapNum =
+      cleanPhone.length <= 11 && !cleanPhone.startsWith('55')
+        ? `55${cleanPhone}`
+        : cleanPhone;
+
+    const saldoPagar = Math.max(0, Number(enc.valor || 0) - Number(enc.sinal || 0));
+    const itens = enc.pedido_catalogo_id ? pedidoItens[enc.pedido_catalogo_id] : null;
+    const businessName = profile?.catalogo_nome || 'Nossa Empresa';
+
+    // Extrai forma de pagamento das observações se houver
+    let formaPag = '';
+    const matchPag =
+      enc.observacoes?.match(/\[Pagamento:\s*([^\]]+)\]/i) ||
+      enc.observacoes?.match(/Pagamento:\s*([^|;\n]+)/i);
+    if (matchPag) {
+      formaPag = matchPag[1].trim();
+    }
+
+    const linhas: string[] = [
+      `👋 Olá, *${enc.cliente.trim()}*! Tudo bem?`,
+      `Aqui é da equipe *${businessName}* referente à sua Ordem de Serviço / Encomenda${
+        enc.pedido_catalogo_id ? ` *#${enc.pedido_catalogo_id}*` : ''
+      }.`,
+      '',
+      `📋 *Detalhes da Encomenda:*`,
+      `• *Cliente:* ${enc.cliente}`,
+      `• *Item / Serviço:* ${enc.produto}`,
+    ];
+
+    if (itens && itens.length > 0) {
+      linhas.push(`• *Itens do Pedido:*`);
+      itens.forEach((it) => {
+        linhas.push(`   - ${it.nome_produto} x${it.quantidade} (${formatMoney(it.subtotal)})`);
+      });
+    }
+
+    linhas.push(`• *Valor Total:* ${formatMoney(enc.valor)}`);
+
+    if (Number(enc.sinal) > 0) {
+      linhas.push(`• *Sinal / Entrada:* ${formatMoney(enc.sinal)}`);
+      if (saldoPagar > 0) {
+        linhas.push(`• *Restante a pagar:* ${formatMoney(saldoPagar)}`);
+      } else {
+        linhas.push(`• *Situação:* Quitado integralmente ✅`);
+      }
+    } else {
+      linhas.push(`• *A acertar na entrega:* ${formatMoney(enc.valor)}`);
+    }
+
+    if (formaPag) {
+      linhas.push(`• *Forma de Pagamento:* ${formaPag}`);
+    }
+
+    if (enc.data_entrega) {
+      linhas.push(`• *Previsão de Entrega:* ${formatDate(enc.data_entrega)}`);
+    }
+
+    if (enc.status) {
+      linhas.push(`• *Status Atual:* ${enc.status}`);
+    }
+
+    const obsLimpa = enc.observacoes
+      ? enc.observacoes
+          .replace(/\[Pagamento:\s*[^\]]+\]\s*/gi, '')
+          .replace(/Pagamento:\s*[^|;\n]+(\s*\|\s*)?/gi, '')
+          .trim()
+      : '';
+
+    if (obsLimpa) {
+      linhas.push(`• *Observações:* ${obsLimpa}`);
+    }
+
+    linhas.push('');
+    linhas.push('Qualquer dúvida estamos à disposição! Muito obrigado(a).');
+
+    return `https://wa.me/${zapNum}?text=${encodeURIComponent(linhas.join('\n'))}`;
+  };
 
   const handleSalvar = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,33 +284,124 @@ export default function EncomendasPage() {
     setSubmitting(true);
     setMsg(null);
 
-    const { error } = await supabase.from('encomendas').insert({
-      cliente: cliente.trim(),
-      telefone: telefone.trim() || null,
-      produto: produto.trim(),
-      valor: Number(valor),
-      sinal: Number(sinal || 0),
-      data_entrega: dataEntrega || null,
-      status,
-      observacoes: observacoes.trim() || null,
-      user_id: user.id,
-    });
+    try {
+      const obsTexto = observacoes.trim();
+      const obsFinal = formaPagamento
+        ? `[Pagamento: ${formaPagamento}]${obsTexto ? ` ${obsTexto}` : ''}`
+        : obsTexto;
 
-    if (error) {
-      setMsg({ tipo: 'err', texto: error.message });
-    } else {
-      setMsg({ tipo: 'ok', texto: 'Encomenda registrada com sucesso!' });
-      setCliente('');
-      setTelefone('');
-      setProduto('');
-      setValor('');
-      setSinal('0');
-      setDataEntrega('');
-      setStatus('Pendente');
-      setObservacoes('');
-      loadEncomendas();
+      if (editingEncomenda) {
+        // Atualização de encomenda existente
+        const { error } = await supabase
+          .from('encomendas')
+          .update({
+            cliente: cliente.trim(),
+            telefone: telefone.trim() || null,
+            produto: produto.trim(),
+            valor: Number(valor),
+            sinal: Number(sinal || 0),
+            data_entrega: dataEntrega || null,
+            status,
+            observacoes: obsFinal || null,
+          })
+          .eq('id', editingEncomenda.id)
+          .eq('user_id', user.id);
+
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        // Se for pedido do catálogo, atualiza status e dados no pedidos_catalogo também
+        if (editingEncomenda.pedido_catalogo_id) {
+          await supabase
+            .from('pedidos_catalogo')
+            .update({
+              cliente: cliente.trim(),
+              telefone: telefone.trim(),
+              total: Number(valor),
+              status,
+              atualizado_em: new Date().toISOString(),
+            })
+            .eq('id', editingEncomenda.pedido_catalogo_id)
+            .eq('usuario_id', user.id);
+        }
+
+        setMsg({ tipo: 'ok', texto: 'Ordem / Encomenda alterada com sucesso!' });
+        resetForm();
+        loadData();
+      } else {
+        // Nova encomenda
+        const qtdNum = Number(quantidade) > 0 ? Number(quantidade) : 1;
+        const nomeFinal = produto.trim();
+        const descFinal = `${nomeFinal}${qtdNum > 1 ? ` (x${qtdNum})` : ''}`;
+
+        const { error } = await supabase.from('encomendas').insert({
+          cliente: cliente.trim(),
+          telefone: telefone.trim() || null,
+          produto: descFinal,
+          valor: Number(valor),
+          sinal: Number(sinal || 0),
+          data_entrega: dataEntrega || null,
+          status,
+          observacoes: obsFinal || null,
+          user_id: user.id,
+        });
+
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        // Dar baixa no estoque se solicitado
+        let baixaRealizada = false;
+        if (darBaixaEstoque && selectedProdutoObj) {
+          const qtdAtualProd = Number(selectedProdutoObj.quantidade || 0);
+          const novaQtdProd = Math.max(0, qtdAtualProd - qtdNum);
+
+          // 1. Baixa em produtos
+          await supabase
+            .from('produtos')
+            .update({ quantidade: novaQtdProd })
+            .eq('id', selectedProdutoObj.id)
+            .eq('usuario_id', user.id);
+
+          // 2. Baixa em materiais
+          const { data: mats } = await supabase
+            .from('materiais')
+            .select('id, quantidade')
+            .eq('usuario_id', user.id)
+            .ilike('nome', selectedProdutoObj.nome);
+
+          if (mats && mats.length > 0) {
+            for (const m of mats) {
+              const novaQtdMat = Math.max(0, Number(m.quantidade || 0) - qtdNum);
+              await supabase
+                .from('materiais')
+                .update({ quantidade: novaQtdMat })
+                .eq('id', m.id)
+                .eq('usuario_id', user.id);
+            }
+          }
+
+          baixaRealizada = true;
+        }
+
+        setMsg({
+          tipo: 'ok',
+          texto: `Encomenda registrada com sucesso! ${
+            baixaRealizada
+              ? `Baixa de ${quantidade} un. efetuada no estoque.`
+              : ''
+          }`,
+        });
+
+        resetForm();
+        loadData();
+      }
+    } catch (err: any) {
+      setMsg({ tipo: 'err', texto: err.message || 'Erro ao salvar encomenda.' });
+    } finally {
+      setSubmitting(false);
     }
-    setSubmitting(false);
   };
 
   const handleCancelarPedido = async (pedidoId: number) => {
@@ -122,7 +413,7 @@ export default function EncomendasPage() {
         return;
       }
       setMsg({ tipo: 'ok', texto: 'Pedido cancelado e estoque devolvido com sucesso!' });
-      loadEncomendas();
+      loadData();
     } catch (err: any) {
       setMsg({ tipo: 'err', texto: err.message || 'Erro ao cancelar pedido.' });
     }
@@ -142,7 +433,7 @@ export default function EncomendasPage() {
       setMsg({ tipo: 'err', texto: error.message });
     } else {
       setMsg({ tipo: 'ok', texto: 'Encomenda excluída com sucesso!' });
-      loadEncomendas();
+      loadData();
     }
   };
 
@@ -163,9 +454,54 @@ export default function EncomendasPage() {
     <AppShell title="Ordens de Serviço & Encomendas">
       {msg && <div className={`alert ${msg.tipo}`}>{msg.texto}</div>}
 
-      <div className="card">
-        <h3>Nova ordem / encomenda</h3>
-        <form onSubmit={handleSalvar} className="grid grid-4">
+      <div className="card" id="card-form-encomenda">
+        <div className="panel-heading">
+          <div>
+            <span className="panel-kicker">ORDEM DE SERVIÇO</span>
+            <h3>
+              {editingEncomenda
+                ? `Editar encomenda #${editingEncomenda.id}`
+                : 'Nova ordem / encomenda'}
+            </h3>
+          </div>
+          {editingEncomenda && (
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={resetForm}
+            >
+              Cancelar Edição
+            </button>
+          )}
+        </div>
+
+        {editingEncomenda && (
+          <div
+            style={{
+              padding: '10px 14px',
+              borderRadius: '8px',
+              background: 'rgba(217, 119, 6, 0.12)',
+              border: '1px solid rgba(217, 119, 6, 0.3)',
+              marginBottom: '16px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <div>
+              <strong>Alterando encomenda:</strong> {editingEncomenda.cliente} — {editingEncomenda.produto}
+            </div>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={resetForm}
+            >
+              Cancelar
+            </button>
+          </div>
+        )}
+
+        <form onSubmit={handleSalvar} className="grid grid-3">
           <div>
             <label className="label">Cliente *</label>
             <input
@@ -190,6 +526,23 @@ export default function EncomendasPage() {
           </div>
 
           <div>
+            <label className="label">Selecionar Produto Cadastrado</label>
+            <select
+              className="select"
+              value={selectedProdId}
+              onChange={(e) => handleSelectProduto(e.target.value)}
+            >
+              <option value="">-- Selecionar da lista de produtos --</option>
+              {produtos.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.nome} — {formatMoney(p.preco)} (Estoque: {p.quantidade ?? 0} un.)
+                </option>
+              ))}
+              <option value="__manual__">✍️ Outro item / encomenda personalizada...</option>
+            </select>
+          </div>
+
+          <div>
             <label className="label">Produto / Serviço / Armação *</label>
             <input
               type="text"
@@ -197,8 +550,44 @@ export default function EncomendasPage() {
               required
               placeholder="Ex.: Armação + Lente Multifocal / Pedido Especial"
               value={produto}
-              onChange={(e) => setProduto(e.target.value)}
+              onChange={(e) => {
+                setProduto(e.target.value);
+                if (selectedProdId !== '__manual__' && selectedProdId !== '') {
+                  setSelectedProdId('__manual__');
+                }
+              }}
             />
+          </div>
+
+          <div>
+            <label className="label">Quantidade (unidades) *</label>
+            <input
+              type="number"
+              min="1"
+              step="1"
+              className="input"
+              required
+              value={quantidade}
+              onChange={(e) => handleQuantidadeChange(e.target.value)}
+            />
+            {selectedProdutoObj && (
+              <small
+                style={{
+                  display: 'block',
+                  marginTop: '4px',
+                  color:
+                    Number(selectedProdutoObj.quantidade || 0) < Number(quantidade)
+                      ? '#b3261e'
+                      : 'var(--muted)',
+                  fontWeight: 600,
+                }}
+              >
+                📦 Estoque atual: {selectedProdutoObj.quantidade ?? 0} un.
+                {Number(selectedProdutoObj.quantidade || 0) < Number(quantidade) && (
+                  <span> (⚠️ Quantidade maior que estoque!)</span>
+                )}
+              </small>
+            )}
           </div>
 
           <div>
@@ -213,6 +602,11 @@ export default function EncomendasPage() {
               value={valor}
               onChange={(e) => setValor(e.target.value)}
             />
+            {precoUnitario && Number(quantidade) > 1 && (
+              <small className="muted" style={{ display: 'block', marginTop: '4px' }}>
+                Unitário: {formatMoney(Number(precoUnitario))} x {quantidade}
+              </small>
+            )}
           </div>
 
           <div>
@@ -230,6 +624,22 @@ export default function EncomendasPage() {
                 Restante a pagar: <b>{formatMoney(Math.max(0, Number(valor) - Number(sinal)))}</b>
               </small>
             )}
+          </div>
+
+          <div>
+            <label className="label">Forma de Pagamento</label>
+            <select
+              className="select"
+              value={formaPagamento}
+              onChange={(e) => setFormaPagamento(e.target.value)}
+            >
+              <option value="Pix">Pix</option>
+              <option value="Cartão de Crédito">Cartão de Crédito</option>
+              <option value="Cartão de Débito">Cartão de Débito</option>
+              <option value="Dinheiro">Dinheiro</option>
+              <option value="A Prazo / Boleto">A Prazo / Boleto</option>
+              <option value="A Combinar">A Combinar</option>
+            </select>
           </div>
 
           <div>
@@ -268,9 +678,54 @@ export default function EncomendasPage() {
             />
           </div>
 
-          <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end' }}>
+          {!editingEncomenda && selectedProdutoObj && (
+            <div style={{ gridColumn: '1 / -1', marginTop: '4px' }}>
+              <label
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '14px',
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={darBaixaEstoque}
+                  onChange={(e) => setDarBaixaEstoque(e.target.checked)}
+                  style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }}
+                />
+                <span>
+                  Dar baixa / reservar <b>{quantidade} un.</b> no estoque do produto ({selectedProdutoObj.nome})
+                </span>
+              </label>
+            </div>
+          )}
+
+          <div
+            style={{
+              gridColumn: '1 / -1',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '8px',
+            }}
+          >
+            {editingEncomenda && (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={resetForm}
+              >
+                Cancelar
+              </button>
+            )}
             <button type="submit" className="btn btn-primary" disabled={submitting}>
-              {submitting ? 'Salvando...' : 'Salvar Ordem / Encomenda'}
+              {submitting
+                ? 'Salvando...'
+                : editingEncomenda
+                ? 'Salvar Alterações'
+                : 'Salvar Ordem / Encomenda'}
             </button>
           </div>
         </form>
@@ -350,15 +805,32 @@ export default function EncomendasPage() {
                       <td>
                         <b>{enc.cliente}</b>
                         {enc.telefone && (
-                          <div style={{ marginTop: '2px' }}>
+                          <div style={{ marginTop: '4px' }}>
                             <a
-                              href={`https://wa.me/${enc.telefone.replace(/\D/g, '')}`}
+                              href={getWhatsAppUrl(enc)}
                               target="_blank"
                               rel="noopener noreferrer"
-                              style={{ color: '#16a34a', fontSize: '12px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                              className="btn btn-sm"
+                              style={{
+                                backgroundColor: '#16a34a',
+                                color: '#ffffff',
+                                padding: '4px 8px',
+                                fontSize: '11px',
+                                fontWeight: 700,
+                                borderRadius: '6px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                textDecoration: 'none',
+                                boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                              }}
+                              title="Enviar mensagem com detalhes da encomenda no WhatsApp"
                             >
-                              <span>💬</span> {enc.telefone}
+                              <span>💬</span> Enviar no WhatsApp
                             </a>
+                            <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '2px' }}>
+                              {enc.telefone}
+                            </div>
                           </div>
                         )}
                       </td>
@@ -412,37 +884,39 @@ export default function EncomendasPage() {
                         </span>
                       </td>
                       <td style={{ textAlign: 'right' }}>
-                        <Link
-                          href={`/encomendas/${enc.id}/editar`}
-                          className="btn btn-secondary btn-sm"
-                          style={{ marginRight: '6px' }}
-                        >
-                          Editar
-                        </Link>
-                        {isCat && enc.status !== 'Cancelado' ? (
+                        <div style={{ display: 'inline-flex', gap: '6px', justifyContent: 'flex-end' }}>
                           <button
                             type="button"
-                            className="btn btn-danger btn-sm"
-                            onClick={() => handleCancelarPedido(enc.pedido_catalogo_id!)}
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => handleEditClick(enc)}
                           >
-                            Cancelar
+                            Editar
                           </button>
-                        ) : (
-                          <button
-                            type="button"
-                            className="btn btn-danger btn-sm"
-                            onClick={() => handleExcluir(enc.id)}
-                          >
-                            Excluir
-                          </button>
-                        )}
+                          {isCat && enc.status !== 'Cancelado' ? (
+                            <button
+                              type="button"
+                              className="btn btn-danger btn-sm"
+                              onClick={() => handleCancelarPedido(enc.pedido_catalogo_id!)}
+                            >
+                              Cancelar
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className="btn btn-danger btn-sm"
+                              onClick={() => handleExcluir(enc.id)}
+                            >
+                              Excluir
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
                 })
               ) : (
                 <tr>
-                  <td colSpan={7} className="muted" style={{ textAlign: 'center', padding: '24px' }}>
+                  <td colSpan={8} className="muted" style={{ textAlign: 'center', padding: '24px' }}>
                     Nenhuma encomenda encontrada.
                   </td>
                 </tr>
@@ -454,3 +928,4 @@ export default function EncomendasPage() {
     </AppShell>
   );
 }
+

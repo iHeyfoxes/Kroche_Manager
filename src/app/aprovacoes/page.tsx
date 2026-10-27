@@ -580,7 +580,7 @@ export default function AprovacoesPage() {
                               )}
                             </div>
                             <div style={{ fontSize: '12px', color: 'var(--muted, #64748B)' }}>
-                              {u.catalogo_nome ? `Ateliê: ${u.catalogo_nome}` : `Slug: /loja/${u.slug}`}
+                              {u.catalogo_nome ? `Empresa: ${u.catalogo_nome}` : `Slug: /loja/${u.slug}`}
                             </div>
                           </div>
                         </div>

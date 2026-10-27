@@ -34,7 +34,7 @@ http://localhost:3000
 |---|---|
 | `/` | Redirecionamento inteligente / Apresentação |
 | `/login` | Autenticação por e-mail e Google OAuth |
-| `/cadastro` | Criação de conta com nicho artesanal e termos |
+| `/cadastro` | Criação de conta com seleção de nicho empresarial e termos |
 | `/esqueci-senha` | Solicitação de link para recuperação de senha |
 | `/reset-senha` | Redefinição de nova senha |
 | `/dashboard` | Painel de controle, KPIs, extrato recente e gráficos |
@@ -44,15 +44,15 @@ http://localhost:3000
 | `/encomendas` | Gestão de encomendas manuais e vindas do catálogo |
 | `/encomendas/[id]/editar` e `/editar-encomenda?id=...` | Edição e cancelamento com reposição de estoque |
 | `/estoque` | Controle de insumos, materiais e alertas de reposição |
-| `/receitas` | Biblioteca de receitas de crochê com links de YouTube e PDF |
+| `/receitas` | Receitas, prescrições e fichas técnicas com leitor de receitas e PDF |
 | `/leads` | Gestão de contatos e pedidos do catálogo público |
 | `/minha-loja` | Central administrativa do catálogo (produtos, categorias e configurações) |
 | `/minha-loja/editar` e `/minha-loja-editar` | Personalização da loja (cores, banner, WhatsApp, etc.) |
 | `/relatorios` | Relatórios financeiros por período com exportação PDF e CSV |
-| `/calculadora` | Calculadora de precificação para peças de crochê |
+| `/calculadora` | Calculadora de precificação e formação de preço de venda |
 | `/ajuda` | Central de ajuda com guia de cada seção |
-| `/perfil` | Alteração de senha e foto de perfil no Supabase Storage |
-| `/loja/[slug]` | Catálogo público do ateliê com carrinho e checkout via WhatsApp |
+| `/perfil` | Alteração de dados da empresa, senha e foto de perfil |
+| `/loja/[slug]` | Catálogo público da empresa com carrinho e checkout via WhatsApp |
 | `/termos-de-uso` | Termos de uso do sistema |
 | `/politica-de-privacidade` | Política de privacidade (LGPD) |
 

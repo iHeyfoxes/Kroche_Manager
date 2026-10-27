@@ -135,7 +135,7 @@ export default function CadastroPage() {
                   <option value="Comércio & Varejo em Geral">Comércio & Varejo em Geral</option>
                   <option value="Prestação de Serviços">Prestação de Serviços</option>
                   <option value="Saúde, Estética e Beleza">Saúde, Estética e Beleza</option>
-                  <option value="Ateliê, Moda e Confecção">Ateliê, Moda e Confecção</option>
+                  <option value="Moda, Vestuário e Confecção">Moda, Vestuário e Confecção</option>
                   <option value="Alimentação e Gastronomia">Alimentação e Gastronomia</option>
                   <option value="Papelaria e Presentes">Papelaria e Presentes</option>
                   <option value="Tecnologia e Informática">Tecnologia e Informática</option>
