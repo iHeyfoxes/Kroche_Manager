@@ -308,7 +308,7 @@ export default function MinhaLojaPage() {
           <div className="store-overview-actions">
             <Link
               className="btn btn-primary"
-              href={`/loja/${encodeURIComponent(lojaSlug)}`}
+              href={`/loja?slug=${encodeURIComponent(lojaSlug)}`}
               target="_blank"
             >
               Abrir catálogo público ↗

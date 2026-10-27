@@ -37,14 +37,30 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async () => {
     setLoading(true);
-    const redirectTo = `${window.location.origin}/dashboard`;
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo },
-    });
+    setAlerta(null);
 
-    if (error) {
-      setAlerta({ tipo: 'erro', msg: supabaseErrorText(error) });
+    try {
+      // GitHub Pages is static; return to the exported dashboard route.
+      const redirectTo = new URL('/dashboard/', window.location.origin).toString();
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'select_account',
+          },
+        },
+      });
+
+      if (error) {
+        setAlerta({ tipo: 'erro', msg: `Não foi possível iniciar o login com Google: ${supabaseErrorText(error)}` });
+        setLoading(false);
+      }
+      // On success, Supabase redirects the browser to Google.
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro inesperado ao iniciar o login com Google.';
+      setAlerta({ tipo: 'erro', msg: message });
       setLoading(false);
     }
   };
