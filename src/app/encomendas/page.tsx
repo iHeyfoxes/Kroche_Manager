@@ -8,6 +8,14 @@ import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { formatMoney, formatDate } from '@/lib/utils';
 import { Encomenda, PedidoItem } from '@/types/database';
+import ModalPapelOrcamento from '@/components/ModalPapelOrcamento';
+import {
+  DadosOrcamento,
+  OpcaoOrcamentoItem,
+  extrairOpcoesDeObservacoes,
+  compilarObservacoesComOpcoes,
+  gerarPdfOrcamento,
+} from '@/lib/pdfOrcamento';
 
 interface ProdutoItem {
   id: number;
@@ -46,6 +54,17 @@ export default function EncomendasPage() {
   const [darBaixaEstoque, setDarBaixaEstoque] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [msg, setMsg] = useState<{ tipo: 'ok' | 'err'; texto: string } | null>(null);
+
+  const [opcoes, setOpcoes] = useState<[OpcaoOrcamentoItem, OpcaoOrcamentoItem, OpcaoOrcamentoItem]>([
+    { titulo: '', descricao: '', valor: '' },
+    { titulo: '', descricao: '', valor: '' },
+    { titulo: '', descricao: '', valor: '' },
+  ]);
+
+  // Modal de visualização e impressão do papel de orçamento
+  const [modalOrcamentoAberto, setModalOrcamentoAberto] = useState(false);
+  const [orcamentoSelecionado, setOrcamentoSelecionado] = useState<DadosOrcamento | null>(null);
+  const [urlWhatsModal, setUrlWhatsModal] = useState<string>('');
 
   useEffect(() => {
     if (!loading && !user) router.replace('/login');
@@ -119,6 +138,65 @@ export default function EncomendasPage() {
     setStatus('Pendente');
     setObservacoes('');
     setDarBaixaEstoque(true);
+    setOpcoes([
+      { titulo: 'Opção 1 - Econômica', descricao: '', valor: '' },
+      { titulo: 'Opção 2 - Padrão / Intermediária', descricao: '', valor: '' },
+      { titulo: 'Opção 3 - Premium / Completa', descricao: '', valor: '' },
+    ]);
+  };
+
+  const handleOpcaoChange = (index: 0 | 1 | 2, campo: keyof OpcaoOrcamentoItem, val: string) => {
+    setOpcoes((prev) => {
+      const clone: [OpcaoOrcamentoItem, OpcaoOrcamentoItem, OpcaoOrcamentoItem] = [
+        { ...prev[0] },
+        { ...prev[1] },
+        { ...prev[2] },
+      ];
+      clone[index][campo] = val;
+      return clone;
+    });
+
+    // Se o valor principal estiver vazio e a primeira opção for preenchida com valor, preenche o principal
+    if (campo === 'valor' && (!valor || valor === '0') && index === 0 && val) {
+      setValor(val);
+    }
+  };
+
+  const handleUsarOpcaoComoPrincipal = (op: OpcaoOrcamentoItem) => {
+    if (op.valor && Number(op.valor) > 0) {
+      setValor(op.valor);
+    }
+  };
+
+  const prepararDadosOrcamento = (enc: Encomenda): DadosOrcamento => {
+    const { observacoesLimpas, formaPagamento: fPag, opcoes: opcs } = extrairOpcoesDeObservacoes(enc.observacoes);
+    return {
+      id: enc.id,
+      data: enc.data,
+      dataEntrega: enc.data_entrega || undefined,
+      cliente: enc.cliente,
+      telefone: enc.telefone,
+      produto: enc.produto,
+      valor: enc.valor,
+      sinal: enc.sinal,
+      formaPagamento: fPag,
+      status: enc.status || 'Pendente',
+      observacoes: observacoesLimpas,
+      opcoes: opcs,
+      empresa: {
+        nome: profile?.catalogo_nome || profile?.nome || 'GestorPro',
+        whatsapp: profile?.whatsapp || '',
+        email: profile?.email || '',
+        slogan: profile?.catalogo_slogan || 'Orçamentos e Gestão de Pedidos',
+      },
+    };
+  };
+
+  const handleAbrirPapelOrcamento = (enc: Encomenda) => {
+    const dados = prepararDadosOrcamento(enc);
+    setOrcamentoSelecionado(dados);
+    setUrlWhatsModal(getWhatsAppUrl(enc));
+    setModalOrcamentoAberto(true);
   };
 
   const handleSelectProduto = (prodIdStr: string) => {
@@ -168,22 +246,11 @@ export default function EncomendasPage() {
     setDataEntrega(enc.data_entrega || '');
     setStatus(enc.status || 'Pendente');
 
-    // Extrai a forma de pagamento das observações se houver
-    const obsVal = enc.observacoes || '';
-    const matchPag = obsVal.match(/\[Pagamento:\s*([^\]]+)\]/i);
-    if (matchPag) {
-      setFormaPagamento(matchPag[1].trim());
-      setObservacoes(obsVal.replace(/\[Pagamento:\s*[^\]]+\]\s*/i, '').trim());
-    } else {
-      const matchOld = obsVal.match(/Pagamento:\s*([^|;\n]+)/i);
-      if (matchOld) {
-        setFormaPagamento(matchOld[1].trim());
-        setObservacoes(obsVal.replace(/Pagamento:\s*[^|;\n]+(\s*\|\s*)?/i, '').trim());
-      } else {
-        setFormaPagamento('Pix');
-        setObservacoes(obsVal);
-      }
-    }
+    // Extrai a forma de pagamento e as 3 opções das observações
+    const { observacoesLimpas, formaPagamento: fPag, opcoes: opcsEdit } = extrairOpcoesDeObservacoes(enc.observacoes);
+    setFormaPagamento(fPag);
+    setObservacoes(observacoesLimpas);
+    setOpcoes(opcsEdit);
 
     setSelectedProdId('__manual__');
     setPrecoUnitario('');
@@ -208,22 +275,15 @@ export default function EncomendasPage() {
     const itens = enc.pedido_catalogo_id ? pedidoItens[enc.pedido_catalogo_id] : null;
     const businessName = profile?.catalogo_nome || 'Nossa Empresa';
 
-    // Extrai forma de pagamento das observações se houver
-    let formaPag = '';
-    const matchPag =
-      enc.observacoes?.match(/\[Pagamento:\s*([^\]]+)\]/i) ||
-      enc.observacoes?.match(/Pagamento:\s*([^|;\n]+)/i);
-    if (matchPag) {
-      formaPag = matchPag[1].trim();
-    }
+    // Extrai forma de pagamento e opções
+    const { observacoesLimpas, formaPagamento: formaPag, opcoes: opcsMsg } = extrairOpcoesDeObservacoes(enc.observacoes);
 
     const linhas: string[] = [
       `👋 Olá, *${enc.cliente.trim()}*! Tudo bem?`,
-      `Aqui é da equipe *${businessName}* referente à sua Ordem de Serviço / Encomenda${
-        enc.pedido_catalogo_id ? ` *#${enc.pedido_catalogo_id}*` : ''
+      `Aqui é da equipe *${businessName}* referente à sua Proposta de Orçamento / Ordem de Serviço${enc.pedido_catalogo_id ? ` *#${enc.pedido_catalogo_id}*` : ''
       }.`,
       '',
-      `📋 *Detalhes da Encomenda:*`,
+      `📋 *Detalhes da Proposta:*`,
       `• *Cliente:* ${enc.cliente}`,
       `• *Item / Serviço:* ${enc.produto}`,
     ];
@@ -235,7 +295,20 @@ export default function EncomendasPage() {
       });
     }
 
-    linhas.push(`• *Valor Total:* ${formatMoney(enc.valor)}`);
+    // Inclui as 3 opções se preenchidas
+    const opcsPreenchidas = opcsMsg.filter(
+      (o) => (o.valor && Number(o.valor) > 0) || (o.descricao && o.descricao.trim())
+    );
+    if (opcsPreenchidas.length > 0) {
+      linhas.push('', `🏷️ *Opções de Orçamento para sua escolha:*`);
+      opcsPreenchidas.forEach((op, idx) => {
+        const vlrFmt = op.valor && Number(op.valor) > 0 ? formatMoney(Number(op.valor)) : 'Sob Consulta';
+        linhas.push(`  ${idx + 1}️⃣ *${op.titulo || `Opção ${idx + 1}`}:* ${vlrFmt}${op.descricao ? ` (${op.descricao})` : ''}`);
+      });
+      linhas.push('');
+    }
+
+    linhas.push(`• *Valor Principal da Proposta:* ${formatMoney(enc.valor)}`);
 
     if (Number(enc.sinal) > 0) {
       linhas.push(`• *Sinal / Entrada:* ${formatMoney(enc.sinal)}`);
@@ -260,15 +333,8 @@ export default function EncomendasPage() {
       linhas.push(`• *Status Atual:* ${enc.status}`);
     }
 
-    const obsLimpa = enc.observacoes
-      ? enc.observacoes
-          .replace(/\[Pagamento:\s*[^\]]+\]\s*/gi, '')
-          .replace(/Pagamento:\s*[^|;\n]+(\s*\|\s*)?/gi, '')
-          .trim()
-      : '';
-
-    if (obsLimpa) {
-      linhas.push(`• *Observações:* ${obsLimpa}`);
+    if (observacoesLimpas) {
+      linhas.push(`• *Observações:* ${observacoesLimpas}`);
     }
 
     linhas.push('');
@@ -285,10 +351,15 @@ export default function EncomendasPage() {
     setMsg(null);
 
     try {
-      const obsTexto = observacoes.trim();
-      const obsFinal = formaPagamento
-        ? `[Pagamento: ${formaPagamento}]${obsTexto ? ` ${obsTexto}` : ''}`
-        : obsTexto;
+      const obsFinal = compilarObservacoesComOpcoes(observacoes, formaPagamento, opcoes);
+
+      let savedId: number | undefined;
+      let savedData: string | undefined;
+
+      // Se valor principal não foi preenchido, usa a opção 1 ou 2 ou 3 como fallback
+      const valorFinal = Number(valor) > 0
+        ? Number(valor)
+        : Number(opcoes[0].valor || opcoes[1].valor || opcoes[2].valor || 0);
 
       if (editingEncomenda) {
         // Atualização de encomenda existente
@@ -298,7 +369,7 @@ export default function EncomendasPage() {
             cliente: cliente.trim(),
             telefone: telefone.trim() || null,
             produto: produto.trim(),
-            valor: Number(valor),
+            valor: valorFinal,
             sinal: Number(sinal || 0),
             data_entrega: dataEntrega || null,
             status,
@@ -311,6 +382,9 @@ export default function EncomendasPage() {
           throw new Error(error.message);
         }
 
+        savedId = editingEncomenda.id;
+        savedData = editingEncomenda.data;
+
         // Se for pedido do catálogo, atualiza status e dados no pedidos_catalogo também
         if (editingEncomenda.pedido_catalogo_id) {
           await supabase
@@ -318,7 +392,7 @@ export default function EncomendasPage() {
             .update({
               cliente: cliente.trim(),
               telefone: telefone.trim(),
-              total: Number(valor),
+              total: valorFinal,
               status,
               atualizado_em: new Date().toISOString(),
             })
@@ -326,29 +400,38 @@ export default function EncomendasPage() {
             .eq('usuario_id', user.id);
         }
 
-        setMsg({ tipo: 'ok', texto: 'Ordem / Encomenda alterada com sucesso!' });
-        resetForm();
-        loadData();
+        setMsg({ tipo: 'ok', texto: 'Orçamento alterado com sucesso! Baixando papel de orçamento...' });
       } else {
         // Nova encomenda
         const qtdNum = Number(quantidade) > 0 ? Number(quantidade) : 1;
         const nomeFinal = produto.trim();
         const descFinal = `${nomeFinal}${qtdNum > 1 ? ` (x${qtdNum})` : ''}`;
 
-        const { error } = await supabase.from('encomendas').insert({
+        const insertPayload = {
           cliente: cliente.trim(),
           telefone: telefone.trim() || null,
           produto: descFinal,
-          valor: Number(valor),
+          valor: valorFinal,
           sinal: Number(sinal || 0),
           data_entrega: dataEntrega || null,
           status,
           observacoes: obsFinal || null,
           user_id: user.id,
-        });
+        };
+
+        const { data: insertedData, error } = await supabase
+          .from('encomendas')
+          .insert(insertPayload)
+          .select()
+          .single();
 
         if (error) {
           throw new Error(error.message);
+        }
+
+        if (insertedData) {
+          savedId = insertedData.id;
+          savedData = insertedData.data;
         }
 
         // Dar baixa no estoque se solicitado
@@ -387,18 +470,71 @@ export default function EncomendasPage() {
 
         setMsg({
           tipo: 'ok',
-          texto: `Encomenda registrada com sucesso! ${
-            baixaRealizada
-              ? `Baixa de ${quantidade} un. efetuada no estoque.`
-              : ''
-          }`,
+          texto: `Orçamento registrado com sucesso! ${baixaRealizada ? `Baixa de ${quantidade} un. efetuada no estoque.` : ''
+            } O download do papel de orçamento foi iniciado.`,
         });
-
-        resetForm();
-        loadData();
       }
+
+      // Prepara os dados do papel de orçamento e dispara download em PDF
+      const qtdFinal = Number(quantidade) > 0 ? Number(quantidade) : 1;
+      const descItem = editingEncomenda ? produto.trim() : `${produto.trim()}${qtdFinal > 1 ? ` (x${qtdFinal})` : ''}`;
+
+      const dadosImpressao: DadosOrcamento = {
+        id: savedId,
+        data: savedData || new Date().toISOString(),
+        dataEntrega: dataEntrega || undefined,
+        cliente: cliente.trim(),
+        telefone: telefone.trim() || undefined,
+        produto: descItem,
+        quantidade: qtdFinal,
+        valor: valorFinal,
+        sinal: Number(sinal || 0),
+        formaPagamento,
+        status,
+        observacoes: observacoes.trim(),
+        opcoes: [
+          { ...opcoes[0] },
+          { ...opcoes[1] },
+          { ...opcoes[2] },
+        ],
+        empresa: {
+          nome: profile?.catalogo_nome || profile?.nome || 'GestorPro',
+          whatsapp: profile?.whatsapp || '',
+          email: profile?.email || '',
+          slogan: profile?.catalogo_slogan || 'Orçamentos e Gestão de Pedidos',
+        },
+      };
+
+      // Abre visualização do papel no modal
+      setOrcamentoSelecionado(dadosImpressao);
+      setUrlWhatsModal(
+        getWhatsAppUrl({
+          id: savedId || 0,
+          cliente: cliente.trim(),
+          telefone: telefone.trim() || null,
+          produto: descItem,
+          valor: valorFinal,
+          sinal: Number(sinal || 0),
+          data_entrega: dataEntrega || null,
+          status,
+          observacoes: obsFinal,
+          user_id: user.id,
+          data: savedData || new Date().toISOString(),
+        })
+      );
+      setModalOrcamentoAberto(true);
+
+      // Inicia o download do PDF automaticamente
+      try {
+        await gerarPdfOrcamento(dadosImpressao);
+      } catch (errPdf) {
+        console.error('Download do PDF via jsPDF:', errPdf);
+      }
+
+      resetForm();
+      loadData();
     } catch (err: any) {
-      setMsg({ tipo: 'err', texto: err.message || 'Erro ao salvar encomenda.' });
+      setMsg({ tipo: 'err', texto: err.message || 'Erro ao salvar orçamento.' });
     } finally {
       setSubmitting(false);
     }
@@ -451,7 +587,7 @@ export default function EncomendasPage() {
   }, [encomendas, busca, filtroStatus, filtroOrigem]);
 
   return (
-    <AppShell title="Ordens de Serviço & Encomendas">
+    <AppShell title="Orçamentos">
       {msg && <div className={`alert ${msg.tipo}`}>{msg.texto}</div>}
 
       <div className="card" id="card-form-encomenda">
@@ -461,7 +597,7 @@ export default function EncomendasPage() {
             <h3>
               {editingEncomenda
                 ? `Editar encomenda #${editingEncomenda.id}`
-                : 'Nova ordem / encomenda'}
+                : 'Orçamentos/Encomendas'}
             </h3>
           </div>
           {editingEncomenda && (
@@ -667,6 +803,93 @@ export default function EncomendasPage() {
             </select>
           </div>
 
+          <div className="orcamento-opcoes-card">
+            <div className="orcamento-opcoes-header">
+              <div>
+                <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--marrom-principal)', letterSpacing: '0.5px' }}>
+                  3 OPÇÕES DE VALORES DO ORÇAMENTO
+                </span>
+              </div>
+            </div>
+
+            <div className="orcamento-opcoes-grid">
+              {opcoes.map((op, idx) => (
+                <div key={idx} className="orcamento-opcao-box">
+                  <div className="orcamento-opcao-header">
+                    <span className="orcamento-badge-op">Opção {idx + 1}</span>
+                    {op.valor && Number(op.valor) > 0 && (
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '4px' }}
+                        onClick={() => handleUsarOpcaoComoPrincipal(op)}
+                        title="Definir este valor como o Valor Total principal do pedido"
+                      >
+                        👉 Usar no Total
+                      </button>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="label" style={{ fontSize: '11px', marginBottom: '3px' }}>
+                      Nome / Título da Opção
+                    </label>
+                    <input
+                      type="text"
+                      className="input"
+                      style={{ fontSize: '13px' }}
+                      placeholder={
+                        idx === 0
+                          ? 'Ex: Opção 1 - Básica / Monofocal'
+                          : idx === 1
+                            ? 'Ex: Opção 2 - Antirreflexo / Padrão'
+                            : 'Ex: Opção 3 - Fotossensível / Premium'
+                      }
+                      value={op.titulo}
+                      onChange={(e) => handleOpcaoChange(idx as 0 | 1 | 2, 'titulo', e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="label" style={{ fontSize: '11px', marginBottom: '3px' }}>
+                      Descrição / Materiais / Lentes
+                    </label>
+                    <input
+                      type="text"
+                      className="input"
+                      style={{ fontSize: '12px' }}
+                      placeholder={
+                        idx === 0
+                          ? 'Lente simples / acabamento comum'
+                          : idx === 1
+                            ? 'Tratamento antirreflexo + proteção UV'
+                            : 'Multifocal digital + fotossensível'
+                      }
+                      value={op.descricao}
+                      onChange={(e) => handleOpcaoChange(idx as 0 | 1 | 2, 'descricao', e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="label" style={{ fontSize: '11px', marginBottom: '3px' }}>
+                      Valor Proposto (R$)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      className="input"
+                      style={{ fontWeight: 700, fontSize: '14px' }}
+                      placeholder="0,00"
+                      value={op.valor}
+                      onChange={(e) => handleOpcaoChange(idx as 0 | 1 | 2, 'valor', e.target.value)}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <div style={{ gridColumn: '1 / -1' }}>
             <label className="label">Observações Técnicas / Prescrição</label>
             <input
@@ -724,8 +947,8 @@ export default function EncomendasPage() {
               {submitting
                 ? 'Salvando...'
                 : editingEncomenda
-                ? 'Salvar Alterações'
-                : 'Salvar Ordem / Encomenda'}
+                  ? 'Salvar Alterações'
+                  : 'Salvar Ordem / Encomenda'}
             </button>
           </div>
         </form>
@@ -845,11 +1068,44 @@ export default function EncomendasPage() {
                             ))}
                           </div>
                         )}
-                        {enc.observacoes && (
-                          <div style={{ marginTop: '4px', fontSize: '12px', color: 'var(--muted)', fontStyle: 'italic' }}>
-                            Nota: {enc.observacoes}
-                          </div>
-                        )}
+                        {/* Exibe tags das 3 opções de orçamento se preenchidas */}
+                        {(() => {
+                          const { opcoes: opcsRow } = extrairOpcoesDeObservacoes(enc.observacoes);
+                          const opcsPreenchidas = opcsRow.filter(
+                            (o) => (o.valor && Number(o.valor) > 0) || (o.descricao && o.descricao.trim())
+                          );
+                          if (opcsPreenchidas.length === 0) return null;
+                          return (
+                            <div style={{ marginTop: '6px', display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                              {opcsPreenchidas.map((o, idx) => (
+                                <span
+                                  key={idx}
+                                  style={{
+                                    fontSize: '10.5px',
+                                    padding: '2px 6px',
+                                    borderRadius: '4px',
+                                    background: 'rgba(37, 99, 235, 0.1)',
+                                    color: '#1d4ed8',
+                                    fontWeight: 600,
+                                    border: '1px solid rgba(37, 99, 235, 0.2)',
+                                  }}
+                                  title={o.descricao || o.titulo}
+                                >
+                                  🏷️ {o.titulo}: {o.valor && Number(o.valor) > 0 ? formatMoney(Number(o.valor)) : 'Sob Consulta'}
+                                </span>
+                              ))}
+                            </div>
+                          );
+                        })()}
+                        {(() => {
+                          const { observacoesLimpas } = extrairOpcoesDeObservacoes(enc.observacoes);
+                          if (!observacoesLimpas) return null;
+                          return (
+                            <div style={{ marginTop: '4px', fontSize: '12px', color: 'var(--muted)', fontStyle: 'italic' }}>
+                              Nota: {observacoesLimpas}
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td>
                         <b>{formatMoney(enc.valor)}</b>
@@ -884,7 +1140,27 @@ export default function EncomendasPage() {
                         </span>
                       </td>
                       <td style={{ textAlign: 'right' }}>
-                        <div style={{ display: 'inline-flex', gap: '6px', justifyContent: 'flex-end' }}>
+                        <div style={{ display: 'inline-flex', gap: '6px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                          <button
+                            type="button"
+                            className="btn btn-sm"
+                            style={{
+                              backgroundColor: '#2563eb',
+                              color: '#ffffff',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              fontWeight: 700,
+                              padding: '4px 8px',
+                              fontSize: '11px',
+                              borderRadius: '6px',
+                              boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                            }}
+                            onClick={() => handleAbrirPapelOrcamento(enc)}
+                            title="Visualizar, imprimir ou baixar papel de orçamento"
+                          >
+                            <span>📄</span> Imprimir / PDF
+                          </button>
                           <button
                             type="button"
                             className="btn btn-secondary btn-sm"
@@ -925,6 +1201,14 @@ export default function EncomendasPage() {
           </table>
         </div>
       </div>
+
+      {/* Modal de Visualização, Impressão e Download do Papel de Orçamento */}
+      <ModalPapelOrcamento
+        isOpen={modalOrcamentoAberto}
+        onClose={() => setModalOrcamentoAberto(false)}
+        dados={orcamentoSelecionado}
+        whatsAppUrl={urlWhatsModal}
+      />
     </AppShell>
   );
 }

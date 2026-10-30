@@ -226,7 +226,7 @@ export default function AppShell({ children, title }: AppShellProps) {
         : []),
       { section: 'Operação Comercial' },
       { href: '/vendas', label: 'Vendas & Pedidos', icon: Icons.Vendas },
-      { href: '/encomendas', label: 'Encomendas', icon: Icons.Encomendas },
+      { href: '/encomendas', label: 'Orçamentos', icon: Icons.Encomendas },
       { href: '/compras', label: 'Compras & Custos', icon: Icons.Compras },
       { href: '/estoque', label: 'Estoque', icon: Icons.Estoque },
       { href: '/receitas', label: 'Receitas & Fichas', icon: Icons.Receitas },
@@ -663,9 +663,9 @@ export default function AppShell({ children, title }: AppShellProps) {
             <div>
               <div className="page-kicker">PAINEL EMPRESARIAL</div>
               <h1 id="pageTitle">{title}</h1>
-              <span className="muted">
+              {/* <span className="muted">
                 Olá, <b>{userName}</b>
-              </span>
+              </span> */}
             </div>
             <button
               className="btn btn-secondary mobile-toggle"
