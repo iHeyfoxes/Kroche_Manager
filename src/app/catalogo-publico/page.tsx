@@ -139,12 +139,12 @@ function LojaSlugContent() {
         // Seleciona apenas campos de exibição pública dos produtos
         const { data: prodsData } = await supabase
           .from('produtos')
-          .select('id, nome, descricao, foto, preco, quantidade, categoria, categoria_id, tempo_producao, mostrar_catalogo')
+          .select('id, usuario_id, nome, descricao, foto, preco, quantidade, categoria, categoria_id, tempo_producao, mostrar_catalogo')
           .eq('usuario_id', usuario.id)
           .eq('mostrar_catalogo', true)
           .order('data', { ascending: false });
 
-        const list = prodsData || [];
+        const list = (prodsData as unknown as Produto[]) || [];
         setProdutos(list);
         const max = Math.max(200, ...list.map((p) => Number(p.preco || 0)));
         setPrecoMax(max);

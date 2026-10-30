@@ -63,7 +63,7 @@ export interface Encomenda {
 
 export interface Produto {
   id: number;
-  usuario_id: string;
+  usuario_id?: string;
   nome: string;
   descricao?: string | null;
   foto?: string | null;
