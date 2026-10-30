@@ -2481,3 +2481,457 @@ html[data-theme="escuro"] .nav a.active::before {
     grid-template-columns: 1fr;
   }
 }
+
+/* ============================================================
+   PAPEL DE ORÇAMENTO & MODAL DE IMPRESSÃO
+   ============================================================ */
+.orcamento-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(4px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.2s ease;
+}
+
+.orcamento-modal-container {
+  max-width: 860px;
+  width: 100%;
+  max-height: 94vh;
+  background: var(--card);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--borda);
+}
+
+.orcamento-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: var(--fundo-claro);
+  border-bottom: 1px solid var(--borda);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.orcamento-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.orcamento-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.orcamento-modal-body {
+  overflow-y: auto;
+  padding: 24px;
+  background: #cbd5e1;
+  display: flex;
+  justify-content: center;
+}
+
+.papel-orcamento-folha {
+  width: 100%;
+  max-width: 780px;
+  background: #ffffff !important;
+  color: #0f172a !important;
+  padding: 36px 40px;
+  border-radius: 8px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  box-sizing: border-box;
+}
+
+.folha-accent-bar {
+  height: 4px;
+  background: #2563eb;
+  border-radius: 2px;
+  margin-bottom: 22px;
+}
+
+.folha-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.folha-empresa-nome {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a !important;
+  margin: 0 0 4px;
+  letter-spacing: -0.5px;
+}
+
+.folha-empresa-slogan {
+  font-size: 13px;
+  color: #64748b !important;
+  margin: 0 0 8px;
+}
+
+.folha-empresa-contatos {
+  font-size: 12px;
+  color: #475569 !important;
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.folha-orcamento-badge {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.folha-badge-titulo {
+  font-size: 13px;
+  font-weight: 800;
+  color: #2563eb !important;
+  letter-spacing: 0.5px;
+}
+
+.folha-badge-numero {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a !important;
+  margin: 2px 0;
+}
+
+.folha-badge-data,
+.folha-badge-validade {
+  font-size: 11.5px;
+  color: #64748b !important;
+}
+
+.folha-divisor {
+  height: 1px;
+  background: #e2e8f0;
+  margin: 18px 0;
+}
+
+.folha-secao-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 14px 18px;
+}
+
+.folha-secao-box-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: #475569 !important;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+
+.folha-grid-dados {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px 24px;
+}
+
+.folha-rotulo {
+  font-size: 12px;
+  color: #64748b !important;
+  margin-right: 6px;
+}
+
+.folha-valor {
+  font-size: 13px;
+  color: #0f172a !important;
+}
+
+.folha-secao {
+  margin-top: 20px;
+}
+
+.folha-secao-titulo {
+  font-size: 12px;
+  font-weight: 800;
+  color: #1e293b !important;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.folha-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.folha-tabela th {
+  background: #f1f5f9;
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  text-align: left;
+  font-size: 11.5px;
+  color: #334155 !important;
+  font-weight: 700;
+}
+
+.folha-tabela td {
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  color: #1e293b !important;
+}
+
+.folha-opcoes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.folha-opcao-card {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 14px;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+}
+
+.folha-opcao-tag {
+  font-size: 10px;
+  font-weight: 800;
+  color: #2563eb !important;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.folha-opcao-titulo {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a !important;
+  margin: 0 0 6px;
+}
+
+.folha-opcao-desc {
+  font-size: 11.5px;
+  color: #475569 !important;
+  flex: 1;
+  margin: 0 0 12px;
+  line-height: 1.45;
+}
+
+.folha-opcao-preco {
+  font-size: 17px;
+  font-weight: 800;
+  color: #2563eb !important;
+  text-align: right;
+}
+
+.folha-observacoes-box {
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #78350f !important;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+.folha-termos {
+  font-size: 10.5px;
+  color: #64748b !important;
+  margin-top: 18px;
+  line-height: 1.5;
+}
+.folha-termos p {
+  margin: 3px 0;
+}
+
+.folha-assinaturas {
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
+  margin-top: 36px;
+}
+
+.folha-assinatura-bloco {
+  flex: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.folha-assinatura-linha {
+  width: 85%;
+  border-top: 1px solid #94a3b8;
+  margin-bottom: 6px;
+}
+
+.folha-assinatura-nome {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f172a !important;
+}
+
+.folha-assinatura-cargo {
+  font-size: 11px;
+  color: #64748b !important;
+}
+
+.folha-rodape {
+  margin-top: 26px;
+  padding-top: 10px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #94a3b8 !important;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* ============================================================
+   ESTILOS DE OPÇÕES NO FORMULÁRIO DE ORÇAMENTOS
+   ============================================================ */
+.orcamento-opcoes-card {
+  grid-column: 1 / -1;
+  background: rgba(37, 99, 235, 0.04);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 6px;
+}
+
+.orcamento-opcoes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.orcamento-opcoes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 768px) {
+  .orcamento-opcoes-grid {
+    grid-template-columns: 1fr;
+  }
+  .folha-opcoes-grid {
+    grid-template-columns: 1fr;
+  }
+  .folha-grid-dados {
+    grid-template-columns: 1fr;
+  }
+  .papel-orcamento-folha {
+    padding: 20px;
+  }
+}
+
+.orcamento-opcao-box {
+  background: var(--card);
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: var(--k-shadow);
+  transition: border-color 0.15s ease;
+}
+
+.orcamento-opcao-box:focus-within {
+  border-color: var(--marrom-principal);
+}
+
+.orcamento-opcao-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.orcamento-badge-op {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(37, 99, 235, 0.12);
+  color: var(--marrom-principal);
+}
+
+/* ============================================================
+   IMPRESSÃO NATIVA (@media print)
+   ============================================================ */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* Oculta toda a interface do sistema */
+  .sidebar,
+  .app-header,
+  .no-print,
+  .orcamento-modal-header,
+  .card,
+  .alert,
+  nav,
+  header,
+  button,
+  .mobile-toggle,
+  .table-wrap {
+    display: none !important;
+  }
+
+  .orcamento-modal-overlay {
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+
+  .orcamento-modal-container {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    border: none !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: transparent !important;
+  }
+
+  .orcamento-modal-body {
+    padding: 0 !important;
+    background: transparent !important;
+    overflow: visible !important;
+  }
+
+  .papel-orcamento-folha {
+    box-shadow: none !important;
+    padding: 8mm 10mm !important;
+    max-width: 100% !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .folha-accent-bar {
+    background: #000000 !important;
+  }
+}
+
