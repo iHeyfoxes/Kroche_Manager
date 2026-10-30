@@ -121,10 +121,10 @@ function LojaSlugContent() {
           return;
         }
 
-        // Fallback: direct query
+        // Fallback: consulta direta segura (selecionando estritamente campos públicos do catálogo)
         const { data: usuario, error: uErr } = await supabase
           .from('usuarios')
-          .select('*')
+          .select('id, nome, slug, tema, foto, catalogo_nome, catalogo_slogan, catalogo_banner, catalogo_cor, catalogo_cor_botao, catalogo_cor_fundo, mostrar_preco, mostrar_estoque, mostrar_tempo, whatsapp')
           .eq('slug', slug)
           .single();
 
@@ -134,11 +134,12 @@ function LojaSlugContent() {
           return;
         }
 
-        setLoja(usuario);
+        setLoja(usuario as Usuario);
 
+        // Seleciona apenas campos de exibição pública dos produtos
         const { data: prodsData } = await supabase
           .from('produtos')
-          .select('*')
+          .select('id, nome, descricao, foto, preco, quantidade, categoria, categoria_id, tempo_producao, mostrar_catalogo')
           .eq('usuario_id', usuario.id)
           .eq('mostrar_catalogo', true)
           .order('data', { ascending: false });

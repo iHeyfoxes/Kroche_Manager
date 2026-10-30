@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 
 // Ícones SVG minimalistas e elegantes
@@ -186,6 +186,7 @@ export default function AppShell({ children, title }: AppShellProps) {
   const [checkingApproval, setCheckingApproval] = useState(false);
   const [checkMsg, setCheckMsg] = useState<{ tipo: 'info' | 'sucesso' | 'erro'; texto: string } | null>(null);
   const pathname = usePathname();
+  const router = useRouter();
 
   const closeMenu = () => setSidebarOpen(false);
 
@@ -241,6 +242,11 @@ export default function AppShell({ children, title }: AppShellProps) {
       { href: '/ajuda', label: 'Central de Ajuda', icon: Icons.Ajuda },
     ];
 
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace('/login');
+    }
+  }, [loading, user, router]);
 
   if (loading) {
     return (
@@ -249,6 +255,57 @@ export default function AppShell({ children, title }: AppShellProps) {
           <div style={{ fontSize: '42px', marginBottom: '16px' }}>💼</div>
           <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 6px', color: 'var(--texto)' }}>Carregando seu negócio...</h2>
           <p className="muted" style={{ margin: 0, fontSize: '14px' }}>Preparando Kroche Manager</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Barreira de segurança: impede flash de layout e dados restritos se o usuário não estiver autenticado
+  if (!user) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: 'var(--fundo-claro, #F8FAFC)',
+        color: 'var(--texto, #0F172A)',
+        display: 'grid',
+        placeItems: 'center',
+        padding: '40px 20px',
+      }}>
+        <div style={{
+          maxWidth: '440px',
+          width: '100%',
+          background: 'var(--card, #FFFFFF)',
+          border: '1px solid var(--borda, #E2E8F0)',
+          borderRadius: '16px',
+          padding: '36px 28px',
+          textAlign: 'center',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
+        }}>
+          <div style={{ fontSize: '46px', marginBottom: '16px' }}>🔒</div>
+          <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 8px', color: 'var(--texto, #0F172A)' }}>
+            Acesso Restrito
+          </h2>
+          <p style={{ fontSize: '14px', lineHeight: 1.6, color: 'var(--muted, #64748B)', margin: '0 0 24px' }}>
+            Esta área é privada e restrita a gestores autorizados. Redirecionando para a página de login...
+          </p>
+          <Link
+            href="/login"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              padding: '12px 20px',
+              background: 'var(--marrom-principal, #2563EB)',
+              color: '#FFFFFF',
+              borderRadius: '10px',
+              fontWeight: 700,
+              fontSize: '14px',
+              textDecoration: 'none',
+            }}
+          >
+            Fazer Login Agora
+          </Link>
         </div>
       </div>
     );

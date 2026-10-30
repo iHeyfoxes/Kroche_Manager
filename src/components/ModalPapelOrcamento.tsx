@@ -205,7 +205,7 @@ export default function ModalPapelOrcamento({
               </table>
             </div>
 
-            {/* As 3 Opções de Orçamento (Comparativo) */}
+    
             <div className="folha-secao">
               <div className="folha-secao-titulo">
                 OPÇÕES DE VALORES & CONDIÇÕES PARA ESCOLHA DO CLIENTE
@@ -250,7 +250,6 @@ export default function ModalPapelOrcamento({
               )}
             </div>
 
-            {/* Resumo Financeiro & Forma de Pagamento */}
             <div className="folha-secao-box" style={{ marginTop: '16px' }}>
               <div className="folha-secao-box-title">CONDIÇÕES FINANCEIRAS & PAGAMENTO</div>
               <div className="folha-grid-dados">
@@ -282,7 +281,6 @@ export default function ModalPapelOrcamento({
               </div>
             </div>
 
-            {/* Observações Técnicas / Prescrição */}
             {dados.observacoes && (
               <div className="folha-secao" style={{ marginTop: '14px' }}>
                 <div className="folha-secao-titulo">OBSERVAÇÕES TÉCNICAS / PRESCRIÇÃO / GRAU</div>
@@ -292,7 +290,6 @@ export default function ModalPapelOrcamento({
               </div>
             )}
 
-            {/* Termos & Validade */}
             <div className="folha-termos">
               <p>
                 • Este orçamento tem validade de <b>15 dias corridos</b> a partir da emissão.
@@ -304,7 +301,6 @@ export default function ModalPapelOrcamento({
               </p>
             </div>
 
-            {/* Linhas de Assinatura */}
             <div className="folha-assinaturas">
               <div className="folha-assinatura-bloco">
                 <div className="folha-assinatura-linha" />

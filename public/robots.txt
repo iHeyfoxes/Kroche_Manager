@@ -1,0 +1,44 @@
+# Bloqueia indexação de rotas administrativas e privadas do sistema
+User-agent: *
+Disallow: /dashboard/
+Disallow: /dashboard
+Disallow: /vendas/
+Disallow: /vendas
+Disallow: /encomendas/
+Disallow: /encomendas
+Disallow: /compras/
+Disallow: /compras
+Disallow: /estoque/
+Disallow: /estoque
+Disallow: /receitas/
+Disallow: /receitas
+Disallow: /leads/
+Disallow: /leads
+Disallow: /relatorios/
+Disallow: /relatorios
+Disallow: /calculadora/
+Disallow: /calculadora
+Disallow: /perfil/
+Disallow: /perfil
+Disallow: /aprovacoes/
+Disallow: /aprovacoes
+Disallow: /editar-encomenda/
+Disallow: /editar-encomenda
+Disallow: /editar-venda/
+Disallow: /editar-venda
+Disallow: /minha-loja-editar/
+Disallow: /minha-loja-editar
+Disallow: /minha-loja/
+Disallow: /minha-loja
+Disallow: /api/
+
+# Permite apenas rotas públicas e institucionais
+Allow: /
+Allow: /catalogo-publico
+Allow: /loja
+Allow: /login
+Allow: /cadastro
+Allow: /esqueci-senha
+Allow: /reset-senha
+Allow: /termos-de-uso
+Allow: /politica-de-privacidade
