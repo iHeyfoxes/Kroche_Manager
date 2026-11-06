@@ -150,6 +150,20 @@ const Icons = {
       <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
   ),
+  Dollar: () => (<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" y1="1" x2="12" y2="23" />
+    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+  </svg>
+  ),
+  Fatura: () => (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="16" y1="13" x2="8" y2="13" />
+      <line x1="16" y1="17" x2="8" y2="17" />
+      <line x1="10" y1="9" x2="8" y2="9" />
+    </svg>
+  )
 };
 
 function getInitials(name: string): string {
@@ -219,10 +233,12 @@ export default function AppShell({ children, title }: AppShellProps) {
   }> = [
       { section: 'Visão Geral' },
       { href: '/dashboard', label: 'Dashboard', icon: Icons.Dashboard },
+      { href: '/minhas-faturas', label: 'Minhas Faturas & PIX', icon: Icons.Fatura },
       ...(isMaster
         ? [
           { section: 'Administração Master' },
           { href: '/aprovacoes', label: 'Aprovação de Clientes', icon: Icons.ShieldCheck },
+          { href: '/cobrancas', label: 'Emitir Boletos & PIX', icon: Icons.Dollar },
         ]
         : []),
       { section: 'Operação Comercial' },
@@ -315,7 +331,9 @@ export default function AppShell({ children, title }: AppShellProps) {
   const userName = profile?.nome?.trim() || user?.user_metadata?.nome || user?.email?.split('@')[0] || 'Gestor(a)';
   const userSubtitle = businessName || user?.email || 'Sua Empresa';
 
-  if (user && !canAccessSystem) {
+  const isAllowlistedPath = pathname === '/minhas-faturas';
+
+  if (user && !canAccessSystem && !isAllowlistedPath) {
     const isSuspendedUser = status === 'suspenso';
     const isInactiveUser = !isActive;
     const isPendingUser = isPending || (!isSuspendedUser && !isInactiveUser);
@@ -540,6 +558,26 @@ export default function AppShell({ children, title }: AppShellProps) {
 
             {/* Ações */}
             <div style={{ display: 'grid', gap: '12px' }}>
+              <Link
+                href="/minhas-faturas"
+                style={{
+                  background: '#10B981',
+                  color: '#FFFFFF',
+                  borderRadius: '10px',
+                  padding: '14px 20px',
+                  fontSize: '15px',
+                  fontWeight: 800,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  textDecoration: 'none',
+                  boxShadow: '0 4px 14px rgba(16, 185, 129, 0.3)',
+                }}
+              >
+                <span>🧾</span> Ver Fatura & Pagar via PIX (R$ 99,00)
+              </Link>
+
               <button
                 type="button"
                 onClick={handleCheckApproval}
@@ -724,14 +762,36 @@ export default function AppShell({ children, title }: AppShellProps) {
                 Olá, <b>{userName}</b>
               </span> */}
             </div>
-            <button
-              className="btn btn-secondary mobile-toggle"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              type="button"
-              aria-label="Menu"
-            >
-              {sidebarOpen ? <Icons.Close /> : <Icons.Menu />}
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Link
+                href="/minhas-faturas"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '7px 14px',
+                  borderRadius: '8px',
+                  background: pathname === '/minhas-faturas' ? 'var(--marrom-principal, #2563EB)' : 'var(--card, #FFFFFF)',
+                  color: pathname === '/minhas-faturas' ? '#FFFFFF' : 'var(--texto, #0F172A)',
+                  border: '1px solid var(--borda, #CBD5E1)',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  textDecoration: 'none',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                }}
+                title="Visualizar minhas faturas e boletos PIX"
+              >
+                <span>🧾</span> Minhas Faturas
+              </Link>
+              <button
+                className="btn btn-secondary mobile-toggle"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                type="button"
+                aria-label="Menu"
+              >
+                {sidebarOpen ? <Icons.Close /> : <Icons.Menu />}
+              </button>
+            </div>
           </div>
 
           <div id="content">{children}</div>
