@@ -118,9 +118,18 @@ export default function DashboardPage() {
           <h2>Seu negócio organizado em um só lugar.</h2>
           <p>Acompanhe faturamento, compras, ordens de serviço, estoque e clientes sem complicação.</p>
         </div>
-        <Link className="btn btn-primary hero-action" href="/minha-loja">
-          🌐 Catálogo / Loja Online
-        </Link>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <Link
+            className="btn btn-secondary hero-action"
+            href="/minhas-faturas"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+          >
+            🧾 Minhas Faturas & PIX
+          </Link>
+          <Link className="btn btn-primary hero-action" href="/minha-loja">
+            🌐 Catálogo / Loja Online
+          </Link>
+        </div>
       </section>
 
       <div className="dashboard-stats">
